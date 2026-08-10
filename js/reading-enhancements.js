@@ -9,6 +9,53 @@
   let touchHymn = null;
   let startedAtHymnTop = false;
 
+  function normalizeMalformedFirstVerses() {
+    let corrected = 0;
+
+    document.querySelectorAll('.hymn').forEach(hymn => {
+      const paragraphs = Array.from(hymn.querySelectorAll(':scope > p.verse'));
+      if (!paragraphs.length) return;
+
+      const first = paragraphs[0];
+      if (!first.classList.contains('indent-2')) return;
+
+      const hasVerseTwo = paragraphs.some(p => {
+        if (!p.classList.contains('main')) return false;
+        const number = p.querySelector('.verse-number')?.textContent?.trim() || '';
+        return number === '2.' || number === '2';
+      });
+
+      // A hymn that begins with chorus styling but later has a numbered verse 2
+      // is malformed data: its opening block is actually verse 1.
+      if (!hasVerseTwo) return;
+
+      const firstMainIndex = paragraphs.findIndex(p => p.classList.contains('main'));
+      const openingBlock = firstMainIndex === -1 ? paragraphs : paragraphs.slice(0, firstMainIndex);
+      if (!openingBlock.length) return;
+
+      const firstLineText = first.textContent.replace(/^\s*1\.\s*/, '').trimStart();
+      first.className = 'verse main';
+      first.innerHTML = '';
+
+      const number = document.createElement('span');
+      number.className = 'verse-number';
+      number.textContent = '1.';
+      first.appendChild(number);
+      first.appendChild(document.createTextNode(' ' + firstLineText));
+
+      openingBlock.slice(1).forEach(line => {
+        line.className = 'verse indent-1';
+      });
+
+      hymn.dataset.firstVerseNormalized = 'true';
+      corrected += 1;
+    });
+
+    if (corrected) {
+      console.info(`Normalized ${corrected} malformed first verse${corrected === 1 ? '' : 's'}.`);
+    }
+  }
+
   function activeSection() {
     return Array.from(document.querySelectorAll('.section')).find(section =>
       !section.classList.contains('hidden') && getComputedStyle(section).display !== 'none'
@@ -171,6 +218,9 @@
   }
 
   document.addEventListener('mgh:data-ready', () => {
+    // Repair any first stanzas that were accidentally tagged as chorus lines.
+    normalizeMalformedFirstVerses();
+
     // Capture phase prevents the legacy index "jump to hymn" handler from running.
     document.addEventListener('click', handleIndexLink, true);
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
