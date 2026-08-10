@@ -149,7 +149,7 @@
   });
 
   function showUpdateNotice(registration) {
-    createNotice('pwa-update-notice', 'A new version of the Hymn Book is available.', [
+    createNotice('pwa-update-notice', 'Hymn Book update available. Tap Refresh to get the latest version.', [
       {
         label: 'Refresh',
         onClick: () => {
