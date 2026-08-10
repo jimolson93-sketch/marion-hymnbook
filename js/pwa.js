@@ -1,7 +1,10 @@
 (() => {
   const DISMISS_KEY = 'mghInstallPromptDismissed';
+  const UPDATE_CHECK_THROTTLE_MS = 15000;
   let deferredInstallPrompt = null;
   let refreshing = false;
+  let activeRegistration = null;
+  let lastUpdateCheck = 0;
 
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -94,8 +97,34 @@
     }
   }
 
-  window.addEventListener('online', showOfflineStatus);
+  async function checkForUpdate(force = false) {
+    if (!activeRegistration || !navigator.onLine || refreshing) return;
+
+    const now = Date.now();
+    if (!force && now - lastUpdateCheck < UPDATE_CHECK_THROTTLE_MS) return;
+    lastUpdateCheck = now;
+
+    try {
+      await activeRegistration.update();
+      if (activeRegistration.waiting && navigator.serviceWorker.controller) {
+        showUpdateNotice(activeRegistration);
+      }
+    } catch (error) {
+      console.debug('Update check skipped:', error);
+    }
+  }
+
+  window.addEventListener('online', () => {
+    showOfflineStatus();
+    checkForUpdate(true);
+  });
   window.addEventListener('offline', showOfflineStatus);
+
+  window.addEventListener('focus', () => checkForUpdate());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkForUpdate();
+  });
+  window.addEventListener('pageshow', () => checkForUpdate());
 
   window.addEventListener('beforeinstallprompt', event => {
     event.preventDefault();
@@ -117,6 +146,7 @@
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js');
+      activeRegistration = registration;
 
       if (registration.waiting && navigator.serviceWorker.controller) {
         showUpdateNotice(registration);
@@ -132,7 +162,12 @@
         });
       });
 
-      navigator.serviceWorker.ready.then(() => {
+      // Do a fresh check whenever the app launches instead of waiting for the
+      // browser's normal service-worker update interval.
+      setTimeout(() => checkForUpdate(true), 350);
+
+      navigator.serviceWorker.ready.then(readyRegistration => {
+        activeRegistration = readyRegistration;
         showOfflineStatus();
         setTimeout(showInstallNotice, 900);
       });
@@ -160,9 +195,6 @@
     }
 
     try {
-      // Remove the current registration so a single reload cannot step through
-      // multiple waiting workers. The fresh page registers only the newest
-      // service-worker.js currently published on the site.
       await registration.unregister();
     } catch (error) {
       console.warn('Could not reset service worker registration:', error);
