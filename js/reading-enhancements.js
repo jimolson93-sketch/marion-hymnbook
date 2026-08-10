@@ -1,7 +1,7 @@
 (() => {
-  const SWIPE_START_X = 12;
+  const SWIPE_START_X = 18;
   const SWIPE_RATIO = 1.35;
-  const COMMIT_RATIO = 0.32;
+  const COMMIT_RATIO = 0.45;
   const TOP_TOLERANCE = 30;
   const SETTLE_MS = 160;
   const SWIPE_FADE = 0.08;
