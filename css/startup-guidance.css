@@ -1,0 +1,21 @@
+.nav button.needs-selection{
+  animation:mghBookCue .7s ease-in-out 2;
+}
+
+@keyframes mghBookCue{
+  0%,100%{
+    box-shadow:none;
+    transform:translateY(0);
+  }
+  50%{
+    box-shadow:0 0 0 3px rgba(116,125,114,.18);
+    transform:translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .nav button.needs-selection{
+    animation:none;
+    box-shadow:0 0 0 3px rgba(116,125,114,.18);
+  }
+}
