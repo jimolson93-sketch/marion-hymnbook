@@ -12,6 +12,12 @@
   padding-bottom:0 !important;
 }
 
+/* Trim only the outer card padding while the index is open. */
+.section:has(.index.show){
+  padding-top:2px !important;
+  padding-bottom:2px !important;
+}
+
 .index a{
   display:block;
   margin:0 !important;
