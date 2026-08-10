@@ -630,7 +630,7 @@ body.show-all-mode .hymn{
 }
 
 body.show-all-mode .hymn + .hymn{
-  border-top:1px solid #e6e9ee;
+  border-top:1px solid #dfe2dc;
   padding-top:18px;
 }
 
@@ -675,7 +675,7 @@ body.show-all-mode .hymn + .hymn::before{
   left:10%;
   width:80%;
   height:2px;
-  background:#cfdced;
+  background:#c6ccc3;
   border-radius:999px;
 }
 
@@ -714,7 +714,7 @@ body.show-all-mode .hymn + .hymn::before{
   left:10% !important;
   width:80% !important;
   height:2px !important;
-  background:#c5d7eb !important;
+  background:#bfc6bc !important;
   border-radius:999px !important;
 }
 
