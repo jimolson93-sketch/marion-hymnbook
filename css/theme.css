@@ -13,17 +13,17 @@ body{
 }
 
 header{
-  gap:18px !important;
+  gap:16px !important;
 }
 
 .site-title{
   margin:0 !important;
-  padding:4px 0 2px !important;
+  padding:4px 0 0 !important;
   background:transparent !important;
   color:var(--text) !important;
   border-radius:0 !important;
   text-align:center;
-  line-height:1.05;
+  line-height:1;
   letter-spacing:0;
 }
 
@@ -39,7 +39,7 @@ header{
 }
 
 .site-title-book{
-  margin-top:5px;
+  margin-top:2px;
   font-size:31px;
   font-weight:650;
   letter-spacing:-.02em;
@@ -47,7 +47,7 @@ header{
 }
 
 .controls{
-  gap:14px !important;
+  gap:12px !important;
 }
 
 .nav{
@@ -84,7 +84,7 @@ header{
 .search-row{
   width:100%;
   max-width:560px;
-  gap:12px !important;
+  gap:10px !important;
 }
 
 .search-row input[type=text]{
@@ -101,7 +101,7 @@ header{
 }
 
 .search-row input[type=text]::placeholder{
-  color:#9ba099;
+  color:#a3a8a1;
 }
 
 .search-row input[type=text]:focus{
@@ -115,42 +115,43 @@ header{
 
 .utility-row{
   display:grid;
-  grid-template-columns:1fr 1fr .72fr;
+  grid-template-columns:1fr 1.15fr .72fr;
   gap:8px;
   width:100%;
+  align-items:stretch;
 }
 
 .utility-row .btn,
 #settingsBtn{
-  min-height:42px;
-  border:1px solid #c8ccc5 !important;
+  min-height:40px;
+  border:1px solid #d3d6d0 !important;
   border-radius:7px !important;
-  background:#ffffff !important;
-  color:#596057 !important;
+  background:rgba(255,255,255,.72) !important;
+  color:#5c625a !important;
   box-shadow:none !important;
-  font-size:15px;
+  font-size:14px;
   font-weight:600;
   line-height:1;
-  padding:0 12px !important;
+  padding:0 10px !important;
 }
 
 #settingsBtn{
   width:auto !important;
   min-width:0 !important;
   height:auto !important;
-  font-size:17px !important;
+  font-size:16px !important;
 }
 
 .utility-row .btn:hover,
 #settingsBtn:hover{
-  background:#f0f1ed !important;
+  background:#f2f3f0 !important;
 }
 
 .utility-row .btn.active,
 #settingsBtn.active{
-  background:#eef0eb !important;
+  background:#eceee9 !important;
   color:#4f574d !important;
-  border-color:#b9beb6 !important;
+  border-color:#bcc1b9 !important;
   box-shadow:none !important;
   transform:none !important;
 }
@@ -159,8 +160,19 @@ header{
   margin-top:2px !important;
 }
 
+.app-version{
+  width:100%;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid #e4e6e1;
+  text-align:center;
+  font-size:11px;
+  font-weight:500;
+  color:#9a9f98;
+}
+
 .main{
-  margin-top:26px !important;
+  margin-top:24px !important;
 }
 
 .index a{
@@ -229,12 +241,12 @@ header{
   }
 
   header{
-    gap:16px !important;
+    gap:14px !important;
   }
 
   .site-title{
     width:100%;
-    padding:4px 0 0 !important;
+    padding:2px 0 0 !important;
   }
 
   .site-title-hall{
@@ -242,12 +254,12 @@ header{
   }
 
   .site-title-book{
-    margin-top:4px;
+    margin-top:1px;
     font-size:28px;
   }
 
   .controls{
-    gap:12px !important;
+    gap:10px !important;
   }
 
   .nav{
@@ -263,7 +275,7 @@ header{
 
   .search-row{
     width:100%;
-    gap:10px !important;
+    gap:9px !important;
   }
 
   .search-row input[type=text]{
@@ -274,23 +286,23 @@ header{
   }
 
   .utility-row{
-    grid-template-columns:1fr 1fr .65fr;
+    grid-template-columns:1fr 1.2fr .68fr;
     gap:7px;
   }
 
   .utility-row .btn,
   #settingsBtn{
-    min-height:42px;
-    font-size:14px;
+    min-height:40px;
+    font-size:13px;
     border-radius:7px !important;
   }
 
   #settingsBtn{
-    font-size:16px !important;
+    font-size:15px !important;
   }
 
   .main{
-    margin-top:24px !important;
+    margin-top:22px !important;
   }
 
   .pwa-notice{
