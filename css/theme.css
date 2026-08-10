@@ -1,0 +1,139 @@
+/* Marion Gospel Hall inspired green / charcoal theme.
+   Loaded after styles.css so this file can safely override legacy blue accents. */
+:root{
+  --accent:#667066;
+  --accent-2:#4f5951;
+  --accent-dark:#38413b;
+  --accent-soft:#e7ebe6;
+  --accent-line:#b7c0b7;
+  --muted:#5f675f;
+  --bg:#f5f6f3;
+  --card:#ffffff;
+  --text:#222824;
+  --focus:#2f4435;
+}
+
+body{background:var(--bg);color:var(--text)}
+h1{background:var(--accent-dark);color:#fff}
+
+.nav button,
+.font-size-slider-row button,
+.btn{
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  color:#fff;
+}
+
+.nav button{opacity:.82}
+.nav button:hover,
+.btn:hover,
+.font-size-slider-row button:hover{filter:brightness(.96)}
+
+.nav button.active,
+#searchBtn.active,
+#indexBtn.active,
+#showAllBtn.active{
+  background:linear-gradient(180deg,#465048,#303832) !important;
+  color:#fff !important;
+  opacity:1;
+  box-shadow:0 0 0 3px rgba(70,80,72,.20),0 4px 10px rgba(48,56,50,.18) !important;
+}
+
+input[type=text]{
+  border-color:#cfd5cf;
+  background:#fff;
+  color:var(--text);
+}
+input[type=text]:focus,
+button:focus-visible,
+a:focus-visible,
+input[type=range]:focus-visible{
+  outline:3px solid rgba(47,68,53,.28);
+  outline-offset:2px;
+}
+
+.index{background:#eef1ed}
+.index a{
+  border-color:#d6ddd6;
+  color:#344b3a;
+  background:#fff;
+}
+.index a:hover{background:#f3f6f2}
+
+.font-size-controls button{color:#fff;border-color:transparent}
+#settingsBtn{color:#fff;background:linear-gradient(180deg,var(--accent),var(--accent-2));border:0}
+#settingsBtn.active{box-shadow:0 0 0 3px rgba(70,80,72,.20)}
+
+body.show-all-mode .hymn + .hymn::before{
+  background:var(--accent-line) !important;
+}
+
+/* Floating return-to-top control */
+.mgh-home-button{
+  position:fixed;
+  right:max(16px,env(safe-area-inset-right));
+  bottom:max(18px,env(safe-area-inset-bottom));
+  z-index:1000;
+  width:50px;
+  height:50px;
+  border:0;
+  border-radius:50%;
+  background:#38413b;
+  color:#fff;
+  font-size:24px;
+  font-weight:700;
+  line-height:1;
+  box-shadow:0 5px 16px rgba(32,40,34,.25);
+  cursor:pointer;
+  opacity:0;
+  transform:translateY(10px) scale(.96);
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease,background .18s ease;
+}
+.mgh-home-button.visible{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  pointer-events:auto;
+}
+.mgh-home-button:hover{background:#2d352f}
+
+/* Install / update banner */
+.mgh-pwa-banner{
+  position:fixed;
+  left:50%;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  transform:translate(-50%,16px);
+  z-index:1100;
+  width:min(92vw,520px);
+  background:#fff;
+  color:#222824;
+  border:1px solid #c8d0c8;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(28,35,30,.22);
+  padding:14px 15px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease;
+}
+.mgh-pwa-banner.visible{
+  opacity:1;
+  transform:translate(-50%,0);
+  pointer-events:auto;
+}
+.mgh-pwa-title{font-weight:750;font-size:16px;margin:0 0 4px}
+.mgh-pwa-text{font-size:14px;line-height:1.4;color:#4e574f;margin:0}
+.mgh-pwa-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+.mgh-pwa-actions button{
+  min-height:40px;
+  border-radius:9px;
+  padding:8px 14px;
+  font-weight:700;
+  cursor:pointer;
+}
+.mgh-pwa-primary{border:0;background:#465048;color:#fff}
+.mgh-pwa-secondary{border:1px solid #bbc4bb;background:#fff;color:#303832}
+
+@media (max-width:700px){
+  .mgh-home-button{width:46px;height:46px;font-size:21px;right:12px;bottom:max(12px,env(safe-area-inset-bottom))}
+  .mgh-pwa-banner{bottom:max(12px,env(safe-area-inset-bottom));padding:13px;width:calc(100vw - 24px)}
+  .mgh-pwa-actions button{flex:1 1 auto}
+}
