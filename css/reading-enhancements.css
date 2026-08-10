@@ -67,11 +67,8 @@
   to{opacity:1;transform:translateY(0)}
 }
 
-/* Keep the original hymn in the touch hit-test tree while the swipe overlay is active.
-   iOS Safari can stop delivering live touchmove events if the touched element is hidden. */
 .hymn-swipe-source-hidden{
   opacity:0 !important;
-  pointer-events:auto !important;
 }
 
 .hymn-swipe-viewport{
@@ -106,6 +103,8 @@
 }
 
 .swipe-panel{
+  display:block !important;
+  visibility:visible !important;
   position:absolute !important;
   inset:0 !important;
   width:100% !important;
