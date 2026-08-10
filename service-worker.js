@@ -1,11 +1,13 @@
-const CACHE_NAME = 'mgh-hymnbook-v6';
+const CACHE_NAME = 'mgh-hymnbook-v7';
 const APP_ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './css/theme.css',
+  './css/reading-enhancements.css',
   './js/bootstrap.js',
   './js/app.js',
+  './js/reading-enhancements.js',
   './js/pwa.js',
   './data/new-believers.html',
   './data/gospel.html',
