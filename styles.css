@@ -1,0 +1,739 @@
+  :root{
+    --max-w:1100px;
+    --accent:#0b63d8;
+    --accent-2:#055bb5;
+    --muted:#6b7280;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --radius:12px;
+    --text:#0f1724;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    padding:20px;
+    display:flex;
+    justify-content:center;
+  }
+
+  .container{width:100%;max-width:var(--max-w)}
+  header{display:flex;flex-direction:column;align-items:center;gap:12px}
+  h1{margin:0;background:var(--accent);color:white;padding:10px 20px;border-radius:999px;font-size:20px}
+  .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;width:100%}
+  .nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .nav button{
+    border:0;
+    padding:10px 16px;
+    border-radius:999px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-2));
+    color:white;
+    cursor:pointer;
+    font-weight:600;
+  }
+  
+  .nav button{
+    transition:background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+    opacity:.68;
+  }
+  .nav button.active{
+    background:linear-gradient(180deg,#0a4fa8,#083d82);
+    color:#fff;
+    opacity:1;
+    box-shadow:0 0 0 3px rgba(11,99,216,.22), 0 4px 10px rgba(11,99,216,.22);
+    transform:translateY(-1px);
+  }
+
+  .search-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    max-width:100%;
+  }
+  input[type=text]{
+    padding:10px 12px;
+    border-radius:999px;
+    border:1px solid #e6e9ee;
+    width:360px;
+    min-width:140px;
+    max-width:100%;
+    font-size:16px
+  }
+
+  /* Font controls get their own full-width line */
+  .font-size-row{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+
+  /* Automatic small-screen / phone layout */
+  @media (max-width:700px){
+    body{
+      padding:8px;
+      overflow-x:hidden;
+    }
+    .container{
+      max-width:100%;
+      min-width:0;
+    }
+    header{
+      gap:10px;
+      width:100%;
+    }
+    h1{
+      width:100%;
+      text-align:center;
+      font-size:18px;
+      padding:10px 12px;
+      border-radius:14px;
+    }
+    .controls{
+      width:100%;
+      gap:10px;
+    }
+    .nav{
+      width:100%;
+      gap:6px;
+    }
+    .nav button{
+      flex:1 1 0;
+      min-width:0;
+      padding:10px 8px;
+      font-size:14px;
+      white-space:normal;
+    }
+    .search-row{
+      width:100%;
+      gap:7px;
+    }
+    .search-row input[type=text]{
+      flex:1 1 100%;
+      width:100%;
+      min-width:0;
+    }
+    .search-row > button{
+      flex:1 1 calc(33.333% - 6px);
+      min-width:0;
+      padding-left:8px;
+      padding-right:8px;
+      white-space:nowrap;
+    }
+    .font-size-row{
+      width:100%;
+      margin-top:2px;
+    }
+    .font-size-controls{
+      width:100%;
+      justify-content:center;
+    }
+    .font-size-controls button{
+      min-width:54px;
+      height:42px;
+    }
+    .section{
+      padding:10px 6px;
+      border-radius:10px;
+    }
+    .hymn{
+      width:100%;
+      max-width:100%;
+      padding:8px 2px;
+      overflow-wrap:anywhere;
+      word-break:normal;
+    }
+    .hymn h3{
+      font-size:1.2em;
+      padding:0 6px;
+    }
+    .verse{
+      max-width:100%;
+      gap:5px;
+      overflow-wrap:anywhere;
+    }
+    .verse-number{
+      width:22px;
+      min-width:22px;
+    }
+    .verse.main{
+      margin-left:0;
+    }
+    .verse.indent-1{
+      margin-left:1.35em;
+    }
+    .verse.indent-2{
+      padding-left:2.5em;
+    }
+    .small{
+      text-align:center;
+    }
+  }
+
+  @media (max-width:380px){
+    .nav button{
+      font-size:13px;
+      padding:9px 5px;
+    }
+    .search-row > button{
+      font-size:13px;
+      padding-left:5px;
+      padding-right:5px;
+    }
+    .verse.indent-1{
+      margin-left:.9em;
+    }
+    .verse.indent-2{
+      padding-left:1.7em;
+    }
+  }
+
+  .main{margin-top:18px}
+  .section{
+    background:var(--card);
+    padding:18px;
+    border-radius:var(--radius);
+    box-shadow:0 6px 20px rgba(12,15,20,0.06);
+    margin-bottom:16px;
+  }
+  .section.hidden{display:none}
+  .index{
+    display:none;
+    background:#f1f5f9;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:12px;
+    column-count:1
+  }
+  .index.show{display:block}
+  .index a{
+    display:block;
+    padding:6px 10px;
+    border-radius:8px;
+    margin:4px 0;
+    background:white;
+    border:1px solid #e6eefc;
+    color:var(--accent);
+    text-decoration:none
+  }
+
+  .hymn{
+    padding:12px;
+    border-radius:10px;
+    margin:0 auto 12px auto;
+    max-width:700px;
+    border-left:3px solid transparent;
+    display:none;
+    text-align:left;
+	font-size: calc(1.5em * var(--hymn-scale, 1));
+	padding-bottom: 30em; /* adds space below each hymn */
+  }
+  .hymn.show{display:block}
+  .hymn h3{margin:0 0 8px 0;font-size:1.2em}
+
+  /* Hymn font-size controls */
+  .font-size-controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin:0;
+  }
+  .font-size-controls button{
+    min-width:42px;
+    height:40px;
+    padding:0 11px;
+    border:1px solid #d7e0ec;
+    border-radius:999px;
+    background:white;
+    color:var(--accent);
+    font-weight:700;
+    font-size:17px;
+    cursor:pointer;
+  }
+  .font-size-controls button:active{transform:scale(.97)}
+  .font-size-display{
+    min-width:48px;
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    font-weight:600;
+  }
+
+  .verse{
+    margin:0 0 4px 0;
+    line-height:1.4;
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+  }
+
+  .verse-number{
+    font-weight:bold;
+    color:var(--muted);
+    width:36px;
+    text-align:right;
+    flex-shrink:0;
+  }
+
+  .verse.main{
+    margin-top:12px;
+    margin-left:.9em;
+  }
+
+  .verse.indent-1{
+    margin-left:2.7em;
+  }
+
+  .verse.indent-2{
+    padding-left:5em;
+    color:var(--muted);
+  }
+
+  /* --- Reliable spacing between verses and choruses --- */
+  /* ✅ Adjustable spacing between verses/choruses below — modify margin-top value as needed */
+  .verse.indent-1 + .verse.main,
+  .verse.indent-1 + .verse.indent-2,
+  .verse.indent-2 + .verse.main {
+    margin-top: 1.6em !important;
+  }
+
+  /* Keep chorus lines tight with each other */
+  .verse.indent-2 + .verse.indent-2 {
+    margin-top: 0 !important;
+  }
+
+  .verse.main:first-of-type {
+    margin-top: 0.6em;
+  }
+
+  .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+  footer{margin-top:22px;font-size:13px;color:var(--muted);text-align:center}
+  .small{font-size:13px;color:var(--muted)}
+
+
+
+
+.font-size-controls{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  width:min(100%, 430px);
+  margin:0 auto;
+}
+.font-size-label{
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+  letter-spacing:.02em;
+}
+.font-size-slider-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+}
+.font-size-slider-row button{
+  min-width:54px;
+  height:42px;
+  border:0;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+}
+#fontSizeSlider{
+  flex:1 1 auto;
+  width:220px;
+  min-width:120px;
+  max-width:280px;
+}
+.font-size-display{
+  min-width:52px;
+  text-align:center;
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+}
+@media (max-width:700px){
+  .font-size-controls{
+    width:100%;
+  }
+  .font-size-slider-row{
+    gap:8px;
+  }
+  #fontSizeSlider{
+    width:auto;
+    max-width:none;
+  }
+}
+
+
+  /* Better mobile centering and screen usage as hymn size changes */
+  @media (max-width:700px){
+    .section{
+      width:100%;
+      max-width:100%;
+      margin-left:auto;
+      margin-right:auto;
+    }
+
+    .hymn{
+      width:100%;
+      max-width:100%;
+      margin-left:auto !important;
+      margin-right:auto !important;
+      padding-left:0 !important;
+      padding-right:2px !important;
+      transform-origin:top center;
+    }
+
+    .hymn h3{
+      text-align:center;
+      width:100%;
+      margin-left:auto;
+      margin-right:auto;
+    }
+
+    .hymn .verse{
+      width:auto;
+      max-width:100%;
+      margin-right:0;
+    }
+
+    .hymn .verse.main{
+      margin-left:0 !important;
+      margin-right:0;
+    }
+
+    .hymn .verse.indent-1{
+      margin-left:1.35em !important;
+      margin-right:0;
+      padding-left:0 !important;
+    }
+
+    .hymn .verse.indent-2{
+      margin-left:2.25em !important;
+      margin-right:0;
+      padding-left:0 !important;
+    }
+
+    /* At larger mobile hymn sizes, reduce wasted side space */
+    html[data-hymn-zoom="90"] .hymn,
+    html[data-hymn-zoom="95"] .hymn,
+    html[data-hymn-zoom="100"] .hymn{
+      padding-left:2px;
+      padding-right:2px;
+    }
+  }
+
+
+  /* Mobile: center the hymn block while using more screen width as zoom increases */
+  @media (max-width:700px){
+    .section{
+      padding-left:4px !important;
+      padding-right:4px !important;
+    }
+
+    .hymn{
+      box-sizing:border-box;
+      width:calc(100% - var(--mobile-hymn-gutter, 8px)) !important;
+      max-width:none !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+      padding-left:2px !important;
+      padding-right:2px !important;
+    }
+
+    .hymn h3{
+      width:100%;
+      text-align:center;
+      margin-left:auto;
+      margin-right:auto;
+      padding-left:2px;
+      padding-right:2px;
+    }
+
+    .hymn .verse{
+      box-sizing:border-box;
+      max-width:100%;
+    }
+
+    .hymn .verse.main{
+      margin-left:0 !important;
+      margin-right:0 !important;
+    }
+
+    .hymn .verse.indent-1{
+      margin-left:.85em !important;
+      margin-right:0 !important;
+      padding-left:0 !important;
+    }
+
+    .hymn .verse.indent-2{
+      margin-left:1.55em !important;
+      margin-right:0 !important;
+      padding-left:0 !important;
+    }
+
+    .verse-number{
+      width:20px !important;
+      min-width:20px !important;
+    }
+  }
+
+
+
+#settingsBtn{
+  width:42px;
+  min-width:42px;
+  padding:0;
+  font-size:22px;
+  line-height:42px;
+  text-align:center;
+  border-radius:10px;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+#settingsBtn.active{
+  transform:rotate(30deg);
+  box-shadow:0 0 0 3px rgba(11,99,216,.2);
+}
+
+
+.settings-drawer{
+  width:100%;
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  transform:translateY(-8px);
+  transition:max-height .3s ease, opacity .22s ease, transform .3s ease, margin .3s ease;
+  margin-top:0;
+  pointer-events:none;
+}
+.settings-drawer.open{
+  max-height:180px;
+  opacity:1;
+  transform:translateY(0);
+  margin-top:8px;
+  pointer-events:auto;
+}
+.settings-inner{
+  width:100%;
+  display:flex;
+  justify-content:center;
+}
+#settingsBtn{
+  width:42px;
+  min-width:42px;
+  height:42px;
+  padding:0;
+  font-size:22px;
+  line-height:42px;
+  text-align:center;
+  border-radius:10px;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+#settingsBtn.active{
+  transform:rotate(30deg);
+  box-shadow:0 0 0 3px rgba(11,99,216,.2);
+}
+
+
+  @media (max-width:700px){
+    .search-row{
+      display:grid !important;
+      grid-template-columns:1fr 1fr auto;
+      gap:8px;
+      width:100%;
+      align-items:center;
+    }
+
+    .search-row input[type=text]{
+      grid-column:1 / -1;
+      width:100% !important;
+      min-width:0 !important;
+    }
+
+    #searchBtn{
+      grid-column:1;
+    }
+
+    #indexBtn{
+      grid-column:2;
+    }
+
+    #showAllBtn{
+      grid-column:1 / 3;
+    }
+
+    #settingsBtn{
+      grid-column:3;
+      grid-row:2 / 4;
+      align-self:stretch;
+      justify-self:end;
+      width:42px !important;
+      min-width:42px !important;
+      max-width:42px !important;
+      height:42px !important;
+      min-height:42px !important;
+      padding:0 !important;
+      margin:0 !important;
+      border-radius:10px !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      font-size:21px !important;
+      line-height:1 !important;
+      -webkit-appearance:none;
+      appearance:none;
+      flex:none !important;
+    }
+  }
+
+  @media (min-width:701px){
+    #settingsBtn{
+      width:42px;
+      min-width:42px;
+      height:42px;
+      padding:0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+  }
+
+
+#searchBtn.active,
+#indexBtn.active,
+#showAllBtn.active{
+  background:linear-gradient(180deg,#0a4fa8,#083d82) !important;
+  color:#fff !important;
+  box-shadow:0 0 0 3px rgba(11,99,216,.18), 0 3px 8px rgba(11,99,216,.18);
+}
+
+
+/* Compact browsing mode used only while Show All is active */
+body.show-all-mode .hymn{
+  padding-bottom:18px !important;
+  margin-bottom:14px !important;
+}
+
+body.show-all-mode .hymn + .hymn{
+  border-top:1px solid #e6e9ee;
+  padding-top:18px;
+}
+
+body.show-all-mode .hymn:last-of-type{
+  margin-bottom:0 !important;
+}
+
+@media (max-width:700px){
+  body.show-all-mode .hymn{
+    padding-bottom:14px !important;
+    margin-bottom:10px !important;
+  }
+
+  body.show-all-mode .hymn + .hymn{
+    padding-top:14px;
+  }
+}
+
+
+
+
+
+/* Corrected polished Show All separators */
+body.show-all-mode .hymn{
+  position:relative;
+  padding-bottom:18px !important;
+  margin-bottom:18px !important;
+  border-top:none !important;
+  border-radius:10px;
+  width:auto !important;
+}
+
+body.show-all-mode .hymn + .hymn{
+  padding-top:38px !important;
+  margin-top:0 !important;
+}
+
+body.show-all-mode .hymn + .hymn::before{
+  content:"";
+  position:absolute;
+  top:18px;
+  left:10%;
+  width:80%;
+  height:2px;
+  background:#cfdced;
+  border-radius:999px;
+}
+
+@media (max-width:700px){
+  body.show-all-mode .hymn{
+    padding-bottom:16px !important;
+    margin-bottom:16px !important;
+  }
+
+  body.show-all-mode .hymn + .hymn{
+    padding-top:34px !important;
+  }
+
+  body.show-all-mode .hymn + .hymn::before{
+    top:16px;
+    left:9%;
+    width:82%;
+    height:2px;
+  }
+}
+
+
+/* Final balanced spacing for Show All hymn separators */
+body.show-all-mode .hymn{
+  padding-bottom:22px !important;
+  margin-bottom:0 !important;
+}
+
+body.show-all-mode .hymn + .hymn{
+  padding-top:44px !important;
+  margin-top:0 !important;
+}
+
+body.show-all-mode .hymn + .hymn::before{
+  top:21px !important;
+  left:10% !important;
+  width:80% !important;
+  height:2px !important;
+  background:#c5d7eb !important;
+  border-radius:999px !important;
+}
+
+@media (max-width:700px){
+  body.show-all-mode .hymn{
+    padding-bottom:20px !important;
+  }
+
+  body.show-all-mode .hymn + .hymn{
+    padding-top:42px !important;
+  }
+
+  body.show-all-mode .hymn + .hymn::before{
+    top:20px !important;
+    left:9% !important;
+    width:82% !important;
+  }
+}
+
+/* Data loading state used by the split-file PWA. */
+.data-loading{padding:18px;text-align:center;color:var(--muted);font-size:14px}
+.data-load-error{color:#8a2c2c;font-weight:600}
