@@ -25,11 +25,13 @@
 <button data-target="section2" id="nav-section2">Gospel Hymns</button>
 </div>
 <div class="search-row">
-<input aria-label="Search hymns" id="searchInput" placeholder="Enter hymn number…" type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-<button class="btn ghost" id="searchBtn">Search</button>
+<input aria-label="Hymn number" id="searchInput" placeholder="Hymn Number" type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+<button class="btn ghost search-compat" id="searchBtn" aria-hidden="true" tabindex="-1">Search</button>
+<div class="utility-row" aria-label="Hymn book tools">
 <button class="btn ghost" id="indexBtn">Index</button>
-<button class="btn ghost" id="showAllBtn">Show All</button>
-<button id="settingsBtn" type="button" aria-label="Settings" title="Settings">⚙️</button>
+<button class="btn ghost" id="showAllBtn">All Hymns</button>
+<button id="settingsBtn" type="button" aria-label="Hymn size" title="Hymn size">Aa</button>
+</div>
 </div>
 
 <div id="settingsDrawer" class="settings-drawer" aria-hidden="true">
