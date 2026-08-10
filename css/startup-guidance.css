@@ -1,21 +1,78 @@
-.nav button.needs-selection{
-  animation:mghBookCue .7s ease-in-out 2;
+body.hymnbook-cover{
+  min-height:100vh;
+  background:#fff;
 }
 
-@keyframes mghBookCue{
-  0%,100%{
-    box-shadow:none;
-    transform:translateY(0);
+body.hymnbook-cover .container{
+  min-height:100vh;
+}
+
+body.hymnbook-cover header{
+  min-height:78vh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+}
+
+body.hymnbook-cover .controls{
+  width:100%;
+}
+
+body.hymnbook-cover .site-title{
+  margin-top:16vh !important;
+  margin-bottom:56px !important;
+}
+
+body.hymnbook-cover .nav{
+  max-width:340px;
+  margin:0 auto !important;
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:14px !important;
+}
+
+body.hymnbook-cover .nav button{
+  width:100%;
+  min-height:50px;
+  font-size:1rem;
+}
+
+body.hymnbook-cover .search-row,
+body.hymnbook-cover .settings-drawer,
+body.hymnbook-cover .main,
+body.hymnbook-cover footer{
+  display:none !important;
+}
+
+body.hymnbook-cover-opening .search-row,
+body.hymnbook-cover-opening .main{
+  animation:mghCoverReveal .24s ease-out both;
+}
+
+@keyframes mghCoverReveal{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media (orientation:landscape) and (max-height:520px){
+  body.hymnbook-cover header{
+    min-height:auto;
   }
-  50%{
-    box-shadow:0 0 0 3px rgba(116,125,114,.18);
-    transform:translateY(-1px);
+
+  body.hymnbook-cover .site-title{
+    margin-top:7vh !important;
+    margin-bottom:26px !important;
+  }
+
+  body.hymnbook-cover .nav{
+    max-width:520px;
+    grid-template-columns:1fr 1fr !important;
   }
 }
 
 @media (prefers-reduced-motion:reduce){
-  .nav button.needs-selection{
-    animation:none;
-    box-shadow:0 0 0 3px rgba(116,125,114,.18);
+  body.hymnbook-cover-opening .search-row,
+  body.hymnbook-cover-opening .main{
+    animation:none !important;
   }
 }
