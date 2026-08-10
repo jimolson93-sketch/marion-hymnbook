@@ -1,0 +1,19 @@
+{
+  "name": "Marion Gospel Hall Hymn Books",
+  "short_name": "Marion Hymns",
+  "description": "A simple hymn book app for Marion Gospel Hall.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0b63d8",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
