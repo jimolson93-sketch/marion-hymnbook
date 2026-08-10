@@ -12,26 +12,61 @@ body{
   color:var(--text);
 }
 
-h1{
+header{
+  gap:18px !important;
+}
+
+.site-title{
+  margin:0 !important;
+  padding:4px 0 2px !important;
   background:transparent !important;
   color:var(--text) !important;
-  padding:4px 0 8px !important;
   border-radius:0 !important;
-  font-size:28px !important;
-  font-weight:600;
-  letter-spacing:-0.02em;
   text-align:center;
+  line-height:1.05;
+  letter-spacing:0;
+}
+
+.site-title span{
+  display:block;
+}
+
+.site-title-hall{
+  font-size:20px;
+  font-weight:500;
+  letter-spacing:.015em;
+  color:#596057;
+}
+
+.site-title-book{
+  margin-top:5px;
+  font-size:31px;
+  font-weight:650;
+  letter-spacing:-.02em;
+  color:var(--text);
+}
+
+.controls{
+  gap:14px !important;
+}
+
+.nav{
+  width:100%;
+  max-width:560px;
+  gap:10px !important;
 }
 
 .nav button{
+  flex:1 1 0;
   border:1px solid #8d958a !important;
-  padding:9px 18px !important;
+  padding:11px 18px !important;
   border-radius:8px !important;
   background:#ffffff !important;
   color:#525a50 !important;
   box-shadow:none !important;
   opacity:1 !important;
   font-weight:600;
+  font-size:16px;
 }
 
 .nav button:hover{
@@ -46,17 +81,86 @@ h1{
   transform:none !important;
 }
 
-.btn.ghost,
+.search-row{
+  width:100%;
+  max-width:560px;
+  gap:12px !important;
+}
+
+.search-row input[type=text]{
+  width:100% !important;
+  flex:1 1 100%;
+  border:1px solid #d8ddd5 !important;
+  border-radius:16px !important;
+  background:#ffffff;
+  color:var(--text);
+  padding:14px 16px !important;
+  font-size:18px !important;
+  box-shadow:none !important;
+  outline:none;
+}
+
+.search-row input[type=text]::placeholder{
+  color:#9ba099;
+}
+
+.search-row input[type=text]:focus{
+  border-color:#aab1a7 !important;
+  box-shadow:0 0 0 3px rgba(116,125,114,.08) !important;
+}
+
+.search-compat{
+  display:none !important;
+}
+
+.utility-row{
+  display:grid;
+  grid-template-columns:1fr 1fr .72fr;
+  gap:8px;
+  width:100%;
+}
+
+.utility-row .btn,
 #settingsBtn{
+  min-height:42px;
   border:1px solid #c8ccc5 !important;
+  border-radius:7px !important;
   background:#ffffff !important;
   color:#596057 !important;
   box-shadow:none !important;
+  font-size:15px;
+  font-weight:600;
+  line-height:1;
+  padding:0 12px !important;
 }
 
-.btn.ghost:hover,
+#settingsBtn{
+  width:auto !important;
+  min-width:0 !important;
+  height:auto !important;
+  font-size:17px !important;
+}
+
+.utility-row .btn:hover,
 #settingsBtn:hover{
   background:#f0f1ed !important;
+}
+
+.utility-row .btn.active,
+#settingsBtn.active{
+  background:#eef0eb !important;
+  color:#4f574d !important;
+  border-color:#b9beb6 !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+
+.settings-drawer.open{
+  margin-top:2px !important;
+}
+
+.main{
+  margin-top:26px !important;
 }
 
 .index a{
@@ -120,15 +224,73 @@ h1{
 }
 
 @media (max-width:700px){
-  h1{
-    font-size:23px !important;
-    line-height:1.2;
-    padding:2px 6px 6px !important;
+  body{
+    padding:14px 14px 8px !important;
+  }
+
+  header{
+    gap:16px !important;
+  }
+
+  .site-title{
+    width:100%;
+    padding:4px 0 0 !important;
+  }
+
+  .site-title-hall{
+    font-size:18px;
+  }
+
+  .site-title-book{
+    margin-top:4px;
+    font-size:28px;
+  }
+
+  .controls{
+    gap:12px !important;
+  }
+
+  .nav{
+    width:100%;
+    gap:8px !important;
   }
 
   .nav button{
+    border-radius:8px !important;
+    padding:11px 8px !important;
+    font-size:16px;
+  }
+
+  .search-row{
+    width:100%;
+    gap:10px !important;
+  }
+
+  .search-row input[type=text]{
+    min-height:52px;
+    padding:13px 16px !important;
+    font-size:18px !important;
+    border-radius:15px !important;
+  }
+
+  .utility-row{
+    grid-template-columns:1fr 1fr .65fr;
+    gap:7px;
+  }
+
+  .utility-row .btn,
+  #settingsBtn{
+    min-height:42px;
+    font-size:14px;
     border-radius:7px !important;
-    padding:9px 10px !important;
+  }
+
+  #settingsBtn{
+    font-size:16px !important;
+  }
+
+  .main{
+    margin-top:24px !important;
   }
 
   .pwa-notice{
