@@ -3,13 +3,15 @@
   const SWIPE_RATIO = 1.35;
   const COMMIT_RATIO = 0.32;
   const TOP_TOLERANCE = 30;
-  const SETTLE_MS = 180;
+  const SETTLE_MS = 160;
 
   let touchStartX = 0;
   let touchStartY = 0;
   let touchHymn = null;
   let adjacentHymn = null;
-  let preview = null;
+  let swipeViewport = null;
+  let currentPanel = null;
+  let nextPanel = null;
   let swipeDirection = 0;
   let horizontalGesture = false;
   let startedAtHymnTop = false;
@@ -151,31 +153,47 @@
     });
   }
 
-  function clearPreview() {
-    preview?.remove();
-    preview = null;
-    if (touchHymn) {
-      touchHymn.classList.remove('hymn-dragging', 'hymn-settling');
-      touchHymn.style.transform = '';
-      touchHymn.style.transition = '';
-    }
+  function clonePanel(hymn, className) {
+    const panel = hymn.cloneNode(true);
+    panel.classList.remove('show');
+    panel.classList.add('swipe-panel', className);
+    panel.removeAttribute('id');
+    panel.setAttribute('aria-hidden', 'true');
+    panel.style.transform = '';
+    panel.style.transition = '';
+    return panel;
   }
 
-  function makePreview(hymn, direction) {
-    const clone = hymn.cloneNode(true);
-    clone.classList.remove('show');
-    clone.classList.add('swipe-hymn-preview');
-    clone.removeAttribute('id');
-    clone.setAttribute('aria-hidden', 'true');
+  function buildSwipeViewport(current, destination, direction) {
+    const rect = current.getBoundingClientRect();
+    const styles = getComputedStyle(current);
+    const viewport = document.createElement('div');
+    viewport.className = 'hymn-swipe-viewport';
+    viewport.style.left = `${rect.left}px`;
+    viewport.style.top = `${Math.max(0, rect.top)}px`;
+    viewport.style.width = `${rect.width}px`;
+    viewport.style.height = `${Math.max(window.innerHeight - Math.max(0, rect.top), 1)}px`;
+    viewport.style.borderRadius = styles.borderRadius;
+    viewport.style.boxShadow = styles.boxShadow;
 
-    const rect = touchHymn.getBoundingClientRect();
-    clone.style.top = `${Math.max(0, rect.top)}px`;
-    clone.style.left = '0';
-    clone.style.width = `${window.innerWidth}px`;
-    clone.style.height = `${Math.max(window.innerHeight - Math.max(0, rect.top), 1)}px`;
-    clone.style.transform = `translate3d(${direction > 0 ? window.innerWidth : -window.innerWidth}px,0,0)`;
-    document.body.appendChild(clone);
-    return clone;
+    const currentClone = clonePanel(current, 'swipe-panel-current');
+    const nextClone = clonePanel(destination, 'swipe-panel-next');
+    currentClone.style.transform = 'translate3d(0,0,0)';
+    nextClone.style.transform = `translate3d(${direction > 0 ? 100 : -100}%,0,0)`;
+
+    viewport.append(currentClone, nextClone);
+    document.body.appendChild(viewport);
+
+    current.classList.add('hymn-swipe-source-hidden');
+    return { viewport, currentClone, nextClone };
+  }
+
+  function clearSwipeViewport() {
+    swipeViewport?.remove();
+    swipeViewport = null;
+    currentPanel = null;
+    nextPanel = null;
+    if (touchHymn) touchHymn.classList.remove('hymn-swipe-source-hidden');
   }
 
   function updateSearchForProgress(progress) {
@@ -192,34 +210,34 @@
     startedAtHymnTop = false;
   }
 
-  function settleSwipe(commit, dx) {
-    if (!touchHymn) return;
+  function settleSwipe(commit) {
+    if (!touchHymn || !currentPanel || !nextPanel) {
+      clearSwipeViewport();
+      resetSwipeState();
+      return;
+    }
 
-    const width = window.innerWidth;
     const current = touchHymn;
     const destination = adjacentHymn;
     const search = document.getElementById('searchInput');
 
-    current.classList.remove('hymn-dragging');
-    current.classList.add('hymn-settling');
-    current.style.transition = `transform ${SETTLE_MS}ms ease-out`;
-    if (preview) preview.style.transition = `transform ${SETTLE_MS}ms ease-out`;
+    currentPanel.style.transition = `transform ${SETTLE_MS}ms ease-out`;
+    nextPanel.style.transition = `transform ${SETTLE_MS}ms ease-out`;
 
     if (!commit || !destination) {
-      current.style.transform = 'translate3d(0,0,0)';
-      if (preview) preview.style.transform = `translate3d(${swipeDirection > 0 ? width : -width}px,0,0)`;
+      currentPanel.style.transform = 'translate3d(0,0,0)';
+      nextPanel.style.transform = `translate3d(${swipeDirection > 0 ? 100 : -100}%,0,0)`;
       if (search) search.value = originalSearchValue;
 
       setTimeout(() => {
-        clearPreview();
+        clearSwipeViewport();
         resetSwipeState();
       }, SETTLE_MS);
       return;
     }
 
-    const finalCurrentX = swipeDirection > 0 ? -width : width;
-    current.style.transform = `translate3d(${finalCurrentX}px,0,0)`;
-    if (preview) preview.style.transform = 'translate3d(0,0,0)';
+    currentPanel.style.transform = `translate3d(${swipeDirection > 0 ? -100 : 100}%,0,0)`;
+    nextPanel.style.transform = 'translate3d(0,0,0)';
     if (search) search.value = hymnNumber(destination);
 
     setTimeout(() => {
@@ -232,7 +250,7 @@
       document.getElementById('showAllBtn')?.classList.remove('active');
       document.body.classList.remove('show-all-mode');
 
-      clearPreview();
+      clearSwipeViewport();
 
       const title = destination.querySelector('h3') || destination;
       const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
@@ -286,22 +304,23 @@
       }
 
       horizontalGesture = true;
-      touchHymn.classList.add('hymn-dragging');
-      preview = makePreview(adjacentHymn, swipeDirection);
+      const built = buildSwipeViewport(touchHymn, adjacentHymn, swipeDirection);
+      swipeViewport = built.viewport;
+      currentPanel = built.currentClone;
+      nextPanel = built.nextClone;
     }
 
     event.preventDefault();
 
-    const width = window.innerWidth;
+    const width = swipeViewport?.getBoundingClientRect().width || window.innerWidth;
     const limitedDx = swipeDirection > 0
       ? Math.max(-width, Math.min(0, dx))
       : Math.min(width, Math.max(0, dx));
+    const percent = (limitedDx / width) * 100;
 
-    touchHymn.style.transform = `translate3d(${limitedDx}px,0,0)`;
-    if (preview) {
-      const previewX = (swipeDirection > 0 ? width : -width) + limitedDx;
-      preview.style.transform = `translate3d(${previewX}px,0,0)`;
-    }
+    currentPanel.style.transform = `translate3d(${percent}%,0,0)`;
+    const nextPercent = (swipeDirection > 0 ? 100 : -100) + percent;
+    nextPanel.style.transform = `translate3d(${nextPercent}%,0,0)`;
 
     updateSearchForProgress(Math.abs(limitedDx) / width);
   }
@@ -312,15 +331,15 @@
     if (!horizontalGesture || event.changedTouches.length !== 1) {
       const search = document.getElementById('searchInput');
       if (search) search.value = originalSearchValue;
-      clearPreview();
+      clearSwipeViewport();
       resetSwipeState();
       return;
     }
 
     const endX = event.changedTouches[0].clientX;
-    const dx = endX - touchStartX;
-    const progress = Math.abs(dx) / window.innerWidth;
-    settleSwipe(progress >= COMMIT_RATIO, dx);
+    const width = swipeViewport?.getBoundingClientRect().width || window.innerWidth;
+    const progress = Math.abs(endX - touchStartX) / width;
+    settleSwipe(progress >= COMMIT_RATIO);
   }
 
   document.addEventListener('mgh:data-ready', () => {
@@ -330,7 +349,7 @@
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
-    document.addEventListener('touchcancel', () => settleSwipe(false, 0), { passive: true });
+    document.addEventListener('touchcancel', () => settleSwipe(false), { passive: true });
 
     document.querySelectorAll('.index a').forEach(link => {
       link.setAttribute('aria-expanded', 'false');
