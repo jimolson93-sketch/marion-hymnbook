@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mgh-hymnbook-v17';
+const CACHE_NAME = 'mgh-hymnbook-v18';
 const APP_ASSETS = [
   './',
   './index.html',
