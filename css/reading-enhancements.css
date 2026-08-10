@@ -3,13 +3,19 @@
   padding:0 !important;
   border-radius:0 !important;
   margin-top:0 !important;
+  margin-bottom:0 !important;
   box-shadow:none !important;
+}
+
+.index.show{
+  padding-top:0 !important;
+  padding-bottom:0 !important;
 }
 
 .index a{
   display:block;
   margin:0 !important;
-  padding:10px 12px !important;
+  padding:9px 12px !important;
   border:0 !important;
   border-bottom:1px solid #e2e4df !important;
   border-radius:0 !important;
@@ -20,6 +26,11 @@
 
 .index a:first-child{
   border-top:1px solid #e2e4df !important;
+  margin-top:0 !important;
+}
+
+.index a:last-child{
+  margin-bottom:0 !important;
 }
 
 .index a.index-expanded{
@@ -30,7 +41,8 @@
 
 .index-hymn-drawer{
   overflow:hidden;
-  padding:12px 14px 18px 18px;
+  padding:8px 14px 12px 18px;
+  margin:0 !important;
   border-bottom:1px solid #d8dcd5;
   background:transparent;
   color:var(--text);
@@ -43,7 +55,7 @@
 }
 
 .index-hymn-drawer .verse.main{
-  margin-top:10px;
+  margin-top:9px;
 }
 
 .index-hymn-drawer .verse.main:first-child{
@@ -51,32 +63,54 @@
 }
 
 @keyframes indexDrawerOpen{
-  from{opacity:0;transform:translateY(-5px)}
+  from{opacity:0;transform:translateY(-4px)}
   to{opacity:1;transform:translateY(0)}
 }
 
-.hymn-swipe-in-right{
-  animation:hymnSwipeInRight .16s ease-out;
+.hymn-dragging,
+.hymn-settling{
+  position:relative;
+  z-index:31;
+  will-change:transform;
+  backface-visibility:hidden;
 }
 
-.hymn-swipe-in-left{
-  animation:hymnSwipeInLeft .16s ease-out;
+.hymn-dragging{
+  transition:none !important;
 }
 
-@keyframes hymnSwipeInRight{
-  from{opacity:.55;transform:translateX(16px)}
-  to{opacity:1;transform:translateX(0)}
+.swipe-hymn-preview{
+  position:fixed !important;
+  z-index:30;
+  margin:0 !important;
+  padding:0 var(--mobile-hymn-gutter, 8px) 48px !important;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  box-sizing:border-box;
+  pointer-events:none;
+  will-change:transform;
+  backface-visibility:hidden;
 }
 
-@keyframes hymnSwipeInLeft{
-  from{opacity:.55;transform:translateX(-16px)}
-  to{opacity:1;transform:translateX(0)}
+.swipe-hymn-preview h3{
+  margin-top:0 !important;
+}
+
+@media (min-width:701px){
+  .swipe-hymn-preview{
+    padding-left:max(24px, calc((100vw - 760px)/2)) !important;
+    padding-right:max(24px, calc((100vw - 760px)/2)) !important;
+  }
 }
 
 @media (prefers-reduced-motion:reduce){
-  .index-hymn-drawer,
-  .hymn-swipe-in-right,
-  .hymn-swipe-in-left{
+  .index-hymn-drawer{
     animation:none !important;
+  }
+
+  .hymn-settling,
+  .swipe-hymn-preview{
+    transition:none !important;
   }
 }
