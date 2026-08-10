@@ -4,6 +4,7 @@
   const COMMIT_RATIO = 0.32;
   const TOP_TOLERANCE = 30;
   const SETTLE_MS = 160;
+  const SWIPE_FADE = 0.08;
 
   let touchStartX = 0;
   let touchStartY = 0;
@@ -179,7 +180,9 @@
     const currentClone = clonePanel(current, 'swipe-panel-current');
     const nextClone = clonePanel(destination, 'swipe-panel-next');
     currentClone.style.transform = 'translate3d(0,0,0)';
+    currentClone.style.opacity = '1';
     nextClone.style.transform = `translate3d(${direction > 0 ? 100 : -100}%,0,0)`;
+    nextClone.style.opacity = `${1 - SWIPE_FADE}`;
 
     viewport.append(currentClone, nextClone);
     document.body.appendChild(viewport);
@@ -202,6 +205,12 @@
     search.value = progress >= COMMIT_RATIO && adjacentHymn ? hymnNumber(adjacentHymn) : originalSearchValue;
   }
 
+  function updatePanelFade(progress) {
+    const eased = Math.min(1, Math.max(0, progress));
+    if (currentPanel) currentPanel.style.opacity = `${1 - (SWIPE_FADE * eased)}`;
+    if (nextPanel) nextPanel.style.opacity = `${(1 - SWIPE_FADE) + (SWIPE_FADE * eased)}`;
+  }
+
   function resetSwipeState() {
     touchHymn = null;
     adjacentHymn = null;
@@ -221,12 +230,14 @@
     const destination = adjacentHymn;
     const search = document.getElementById('searchInput');
 
-    currentPanel.style.transition = `transform ${SETTLE_MS}ms ease-out`;
-    nextPanel.style.transition = `transform ${SETTLE_MS}ms ease-out`;
+    currentPanel.style.transition = `transform ${SETTLE_MS}ms ease-out, opacity ${SETTLE_MS}ms ease-out`;
+    nextPanel.style.transition = `transform ${SETTLE_MS}ms ease-out, opacity ${SETTLE_MS}ms ease-out`;
 
     if (!commit || !destination) {
       currentPanel.style.transform = 'translate3d(0,0,0)';
+      currentPanel.style.opacity = '1';
       nextPanel.style.transform = `translate3d(${swipeDirection > 0 ? 100 : -100}%,0,0)`;
+      nextPanel.style.opacity = `${1 - SWIPE_FADE}`;
       if (search) search.value = originalSearchValue;
 
       setTimeout(() => {
@@ -237,7 +248,9 @@
     }
 
     currentPanel.style.transform = `translate3d(${swipeDirection > 0 ? -100 : 100}%,0,0)`;
+    currentPanel.style.opacity = `${1 - SWIPE_FADE}`;
     nextPanel.style.transform = 'translate3d(0,0,0)';
+    nextPanel.style.opacity = '1';
     if (search) search.value = hymnNumber(destination);
 
     setTimeout(() => {
@@ -317,12 +330,14 @@
       ? Math.max(-width, Math.min(0, dx))
       : Math.min(width, Math.max(0, dx));
     const percent = (limitedDx / width) * 100;
+    const progress = Math.abs(limitedDx) / width;
 
     currentPanel.style.transform = `translate3d(${percent}%,0,0)`;
     const nextPercent = (swipeDirection > 0 ? 100 : -100) + percent;
     nextPanel.style.transform = `translate3d(${nextPercent}%,0,0)`;
 
-    updateSearchForProgress(Math.abs(limitedDx) / width);
+    updatePanelFade(progress);
+    updateSearchForProgress(progress);
   }
 
   function handleTouchEnd(event) {
