@@ -148,17 +148,34 @@
     window.location.reload();
   });
 
+  async function refreshToLatest(registration) {
+    if (refreshing) return;
+    refreshing = true;
+
+    const notice = document.getElementById('pwa-update-notice');
+    if (notice) {
+      notice.querySelectorAll('button').forEach(button => { button.disabled = true; });
+      const text = notice.querySelector('.pwa-notice-text');
+      if (text) text.textContent = 'Updating Hymn Book…';
+    }
+
+    try {
+      // Remove the current registration so a single reload cannot step through
+      // multiple waiting workers. The fresh page registers only the newest
+      // service-worker.js currently published on the site.
+      await registration.unregister();
+    } catch (error) {
+      console.warn('Could not reset service worker registration:', error);
+    }
+
+    window.location.reload();
+  }
+
   function showUpdateNotice(registration) {
     createNotice('pwa-update-notice', 'Hymn Book update available. Tap Refresh to get the latest version.', [
       {
         label: 'Refresh',
-        onClick: () => {
-          if (registration.waiting) {
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-          } else {
-            window.location.reload();
-          }
-        }
+        onClick: () => refreshToLatest(registration)
       },
       { label: 'Later', secondary: true, onClick: () => hideNotice('pwa-update-notice') }
     ]);
