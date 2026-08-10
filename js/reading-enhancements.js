@@ -1,13 +1,19 @@
 (() => {
-  const SWIPE_MIN_X = 90;
-  const SWIPE_MAX_Y = 55;
-  const SWIPE_RATIO = 1.5;
+  const SWIPE_START_X = 12;
+  const SWIPE_RATIO = 1.35;
+  const COMMIT_RATIO = 0.32;
   const TOP_TOLERANCE = 30;
+  const SETTLE_MS = 180;
 
   let touchStartX = 0;
   let touchStartY = 0;
   let touchHymn = null;
+  let adjacentHymn = null;
+  let preview = null;
+  let swipeDirection = 0;
+  let horizontalGesture = false;
   let startedAtHymnTop = false;
+  let originalSearchValue = '';
 
   function normalizeMalformedFirstVerses() {
     let corrected = 0;
@@ -25,8 +31,6 @@
         return number === '2.' || number === '2';
       });
 
-      // A hymn that begins with chorus styling but later has a numbered verse 2
-      // is malformed data: its opening block is actually verse 1.
       if (!hasVerseTwo) return;
 
       const firstMainIndex = paragraphs.findIndex(p => p.classList.contains('main'));
@@ -72,6 +76,15 @@
 
   function hymnNumber(hymn) {
     return hymn?.querySelector('h3')?.textContent?.trim().split(/\s+/)[0] || '';
+  }
+
+  function adjacentFor(current, direction) {
+    const section = current?.closest('.section');
+    if (!section) return null;
+    const hymns = Array.from(section.querySelectorAll('.hymn'));
+    const index = hymns.indexOf(current);
+    const nextIndex = index + direction;
+    return index >= 0 && nextIndex >= 0 && nextIndex < hymns.length ? hymns[nextIndex] : null;
   }
 
   function closeIndexDrawers(index, exceptLink = null) {
@@ -134,43 +147,98 @@
 
     requestAnimationFrame(() => {
       const rowTop = link.getBoundingClientRect().top;
-      if (rowTop < 8) {
-        window.scrollBy({ top: rowTop - 8, behavior: 'smooth' });
-      }
+      if (rowTop < 8) window.scrollBy({ top: rowTop - 8, behavior: 'smooth' });
     });
   }
 
-  function showAdjacentHymn(current, direction) {
-    const section = current.closest('.section');
-    if (!section) return;
+  function clearPreview() {
+    preview?.remove();
+    preview = null;
+    if (touchHymn) {
+      touchHymn.classList.remove('hymn-dragging', 'hymn-settling');
+      touchHymn.style.transform = '';
+      touchHymn.style.transition = '';
+    }
+  }
 
-    const hymns = Array.from(section.querySelectorAll('.hymn'));
-    const currentIndex = hymns.indexOf(current);
-    if (currentIndex < 0) return;
+  function makePreview(hymn, direction) {
+    const clone = hymn.cloneNode(true);
+    clone.classList.remove('show');
+    clone.classList.add('swipe-hymn-preview');
+    clone.removeAttribute('id');
+    clone.setAttribute('aria-hidden', 'true');
 
-    const nextIndex = currentIndex + direction;
-    if (nextIndex < 0 || nextIndex >= hymns.length) return;
+    const rect = touchHymn.getBoundingClientRect();
+    clone.style.top = `${Math.max(0, rect.top)}px`;
+    clone.style.left = '0';
+    clone.style.width = `${window.innerWidth}px`;
+    clone.style.height = `${Math.max(window.innerHeight - Math.max(0, rect.top), 1)}px`;
+    clone.style.transform = `translate3d(${direction > 0 ? window.innerWidth : -window.innerWidth}px,0,0)`;
+    document.body.appendChild(clone);
+    return clone;
+  }
 
-    const next = hymns[nextIndex];
-    hymns.forEach(hymn => hymn.classList.remove('show'));
-    section.querySelectorAll('.index.show').forEach(index => index.classList.remove('show'));
-    next.classList.add('show');
-
+  function updateSearchForProgress(progress) {
     const search = document.getElementById('searchInput');
-    if (search) search.value = hymnNumber(next);
+    if (!search) return;
+    search.value = progress >= COMMIT_RATIO && adjacentHymn ? hymnNumber(adjacentHymn) : originalSearchValue;
+  }
 
-    document.getElementById('indexBtn')?.classList.remove('active');
-    document.getElementById('showAllBtn')?.classList.remove('active');
-    document.body.classList.remove('show-all-mode');
+  function resetSwipeState() {
+    touchHymn = null;
+    adjacentHymn = null;
+    swipeDirection = 0;
+    horizontalGesture = false;
+    startedAtHymnTop = false;
+  }
 
-    next.classList.add(direction > 0 ? 'hymn-swipe-in-right' : 'hymn-swipe-in-left');
+  function settleSwipe(commit, dx) {
+    if (!touchHymn) return;
+
+    const width = window.innerWidth;
+    const current = touchHymn;
+    const destination = adjacentHymn;
+    const search = document.getElementById('searchInput');
+
+    current.classList.remove('hymn-dragging');
+    current.classList.add('hymn-settling');
+    current.style.transition = `transform ${SETTLE_MS}ms ease-out`;
+    if (preview) preview.style.transition = `transform ${SETTLE_MS}ms ease-out`;
+
+    if (!commit || !destination) {
+      current.style.transform = 'translate3d(0,0,0)';
+      if (preview) preview.style.transform = `translate3d(${swipeDirection > 0 ? width : -width}px,0,0)`;
+      if (search) search.value = originalSearchValue;
+
+      setTimeout(() => {
+        clearPreview();
+        resetSwipeState();
+      }, SETTLE_MS);
+      return;
+    }
+
+    const finalCurrentX = swipeDirection > 0 ? -width : width;
+    current.style.transform = `translate3d(${finalCurrentX}px,0,0)`;
+    if (preview) preview.style.transform = 'translate3d(0,0,0)';
+    if (search) search.value = hymnNumber(destination);
+
     setTimeout(() => {
-      next.classList.remove('hymn-swipe-in-right', 'hymn-swipe-in-left');
-    }, 180);
+      const section = current.closest('.section');
+      section?.querySelectorAll('.hymn').forEach(hymn => hymn.classList.remove('show'));
+      section?.querySelectorAll('.index.show').forEach(index => index.classList.remove('show'));
+      destination.classList.add('show');
 
-    const title = next.querySelector('h3') || next;
-    const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
-    window.scrollTo({ top: y, behavior: 'smooth' });
+      document.getElementById('indexBtn')?.classList.remove('active');
+      document.getElementById('showAllBtn')?.classList.remove('active');
+      document.body.classList.remove('show-all-mode');
+
+      clearPreview();
+
+      const title = destination.querySelector('h3') || destination;
+      const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
+      window.scrollTo({ top: y, behavior: 'auto' });
+      resetSwipeState();
+    }, SETTLE_MS);
   }
 
   function handleTouchStart(event) {
@@ -179,7 +247,7 @@
     const hymn = event.target.closest('.hymn.show');
     const single = visibleSingleHymn();
     if (!hymn || hymn !== single) {
-      touchHymn = null;
+      resetSwipeState();
       return;
     }
 
@@ -190,41 +258,79 @@
     touchStartY = event.touches[0].clientY;
     touchHymn = hymn;
     startedAtHymnTop = window.pageYOffset <= hymnTop + TOP_TOLERANCE;
+    originalSearchValue = document.getElementById('searchInput')?.value || hymnNumber(hymn);
+  }
+
+  function handleTouchMove(event) {
+    if (!touchHymn || !startedAtHymnTop || event.touches.length !== 1) return;
+
+    const x = event.touches[0].clientX;
+    const y = event.touches[0].clientY;
+    const dx = x - touchStartX;
+    const dy = y - touchStartY;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    if (!horizontalGesture) {
+      if (absX < SWIPE_START_X) return;
+      if (absX < absY * SWIPE_RATIO) {
+        touchHymn = null;
+        return;
+      }
+
+      swipeDirection = dx < 0 ? 1 : -1;
+      adjacentHymn = adjacentFor(touchHymn, swipeDirection);
+      if (!adjacentHymn) {
+        touchHymn = null;
+        return;
+      }
+
+      horizontalGesture = true;
+      touchHymn.classList.add('hymn-dragging');
+      preview = makePreview(adjacentHymn, swipeDirection);
+    }
+
+    event.preventDefault();
+
+    const width = window.innerWidth;
+    const limitedDx = swipeDirection > 0
+      ? Math.max(-width, Math.min(0, dx))
+      : Math.min(width, Math.max(0, dx));
+
+    touchHymn.style.transform = `translate3d(${limitedDx}px,0,0)`;
+    if (preview) {
+      const previewX = (swipeDirection > 0 ? width : -width) + limitedDx;
+      preview.style.transform = `translate3d(${previewX}px,0,0)`;
+    }
+
+    updateSearchForProgress(Math.abs(limitedDx) / width);
   }
 
   function handleTouchEnd(event) {
-    if (!touchHymn || !startedAtHymnTop || event.changedTouches.length !== 1) {
-      touchHymn = null;
+    if (!touchHymn) return;
+
+    if (!horizontalGesture || event.changedTouches.length !== 1) {
+      const search = document.getElementById('searchInput');
+      if (search) search.value = originalSearchValue;
+      clearPreview();
+      resetSwipeState();
       return;
     }
 
     const endX = event.changedTouches[0].clientX;
-    const endY = event.changedTouches[0].clientY;
     const dx = endX - touchStartX;
-    const dy = endY - touchStartY;
-
-    touchHymn = touchHymn.isConnected ? touchHymn : null;
-    if (!touchHymn) return;
-
-    const absX = Math.abs(dx);
-    const absY = Math.abs(dy);
-
-    if (absX >= SWIPE_MIN_X && absY <= SWIPE_MAX_Y && absX >= absY * SWIPE_RATIO) {
-      // Swipe left = next hymn. Swipe right = previous hymn.
-      showAdjacentHymn(touchHymn, dx < 0 ? 1 : -1);
-    }
-
-    touchHymn = null;
+    const progress = Math.abs(dx) / window.innerWidth;
+    settleSwipe(progress >= COMMIT_RATIO, dx);
   }
 
   document.addEventListener('mgh:data-ready', () => {
-    // Repair any first stanzas that were accidentally tagged as chorus lines.
     normalizeMalformedFirstVerses();
 
-    // Capture phase prevents the legacy index "jump to hymn" handler from running.
     document.addEventListener('click', handleIndexLink, true);
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    document.addEventListener('touchcancel', () => settleSwipe(false, 0), { passive: true });
 
     document.querySelectorAll('.index a').forEach(link => {
       link.setAttribute('aria-expanded', 'false');
