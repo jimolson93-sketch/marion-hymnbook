@@ -1,8 +1,9 @@
-const CACHE_NAME = 'mgh-hymnbook-v2';
+const CACHE_NAME = 'mgh-hymnbook-v4';
 const APP_ASSETS = [
   './',
   './index.html',
   './css/styles.css',
+  './css/theme.css',
   './js/bootstrap.js',
   './js/app.js',
   './js/pwa.js',
@@ -42,8 +43,6 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
 
-  // For page navigation, prefer the newest version while online and
-  // fall back to the cached app shell when offline.
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -57,8 +56,23 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For app assets and hymn data, return cached content immediately,
-  // then refresh the cache in the background when the network is available.
+  const isFreshnessSensitive = ['style', 'script'].includes(request.destination);
+
+  if (isFreshnessSensitive) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response && response.status === 200 && response.type !== 'opaque') {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(request).then(cached => {
       const networkFetch = fetch(request)
