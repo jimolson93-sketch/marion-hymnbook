@@ -174,7 +174,16 @@ header{
 
 .utility-row > button:hover{background:#f2f3f0 !important}
 
-.utility-row > button.active{
+#indexBtn.active,
+#showAllBtn.active{
+  background:var(--accent) !important;
+  color:#fff !important;
+  border-color:var(--accent) !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+
+#settingsBtn.active{
   background:#eceee9 !important;
   color:#4f574d !important;
   border-color:#bcc1b9 !important;
