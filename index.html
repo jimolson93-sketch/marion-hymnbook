@@ -3,25 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=200,user-scalable=yes,viewport-fit=cover">
-  <title>Marion Gospel Hall Hymn Books</title>
-  <meta name="theme-color" content="#747d72">
+  <title>Marion Gospel Hall Hymn Book</title>
+  <meta name="theme-color" content="#667066">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="MGH Hymn Book">
-  <meta name="description" content="Marion Gospel Hall hymn books for simple hymn lookup and reading.">
+  <meta name="description" content="Marion Gospel Hall Hymn Book for simple hymn lookup and reading.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/app-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 <div class="container">
 <header>
-<h1>Marion Gospel Hall — Hymn Books</h1>
+<h1 class="app-title"><span class="app-title-main">Marion Gospel Hall</span><span class="app-title-sub">Hymn Book</span></h1>
 <div class="controls">
 <div aria-label="Hymn book sections" class="nav" role="tablist">
-<button data-target="section1" id="nav-section1">New Believers HB</button>
-<button data-target="section2" id="nav-section2">Gospel HB</button>
+<button data-target="section1" id="nav-section1">New Believers</button>
+<button data-target="section2" id="nav-section2">Gospel Hymns</button>
 </div>
 <div class="search-row">
 <input aria-label="Search hymns" id="searchInput" placeholder="Enter hymn number…" type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
@@ -34,36 +35,33 @@
 <div id="settingsDrawer" class="settings-drawer" aria-hidden="true">
   <div class="settings-inner">
     <div class="font-size-row" id="fontSizeRow">
-  
-
-<div class="font-size-controls" id="fontSizeControls" aria-label="Hymn font size controls">
-  <div class="font-size-label">Hymn Size</div>
-  <div class="font-size-slider-row">
-    <button type="button" id="fontDecreaseBtn" aria-label="Decrease hymn size">A−</button>
-    <input type="range" id="fontSizeSlider" min="60" max="100" step="5" value="100" aria-label="Hymn size">
-    <button type="button" id="fontIncreaseBtn" aria-label="Increase hymn size">A+</button>
+      <div class="font-size-controls" id="fontSizeControls" aria-label="Hymn font size controls">
+        <div class="font-size-label">Hymn Size</div>
+        <div class="font-size-slider-row">
+          <button type="button" id="fontDecreaseBtn" aria-label="Decrease hymn size">A−</button>
+          <input type="range" id="fontSizeSlider" min="60" max="100" step="5" value="100" aria-label="Hymn size">
+          <button type="button" id="fontIncreaseBtn" aria-label="Increase hymn size">A+</button>
+        </div>
+        <div class="font-size-display" id="fontSizeDisplay">100%</div>
+      </div>
+    </div>
   </div>
-  <div class="font-size-display" id="fontSizeDisplay">100%</div>
-</div>
-  </div>
-</div>
 </div>
 </div>
 </header>
 <main class="main">
 <section aria-labelledby="nav-section1" class="section" id="section1">
-      <div class="data-loading" aria-live="polite">Loading hymn book…</div>
-    </section>
-<section aria-labelledby="nav-sectio21" class="section" id="section2">
-      <div class="data-loading" aria-live="polite">Loading hymn book…</div>
-    </section>
+  <div class="data-loading" aria-live="polite">Loading hymn book…</div>
+</section>
+<section aria-labelledby="nav-section2" class="section" id="section2">
+  <div class="data-loading" aria-live="polite">Loading hymn book…</div>
+</section>
 </main>
-<footer>
-<div class="small"> </div>
-</footer>
+<footer><div class="small"> </div></footer>
 </div>
 
 <script src="js/bootstrap.js"></script>
 <script src="js/pwa.js"></script>
+<script src="js/usability.js"></script>
 </body>
 </html>
