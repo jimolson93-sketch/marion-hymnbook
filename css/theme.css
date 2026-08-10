@@ -1,0 +1,146 @@
+:root{
+  --accent:#747d72;
+  --accent-2:#60685f;
+  --muted:#72776f;
+  --bg:#f6f5f1;
+  --card:#ffffff;
+  --text:#2f332f;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+}
+
+h1{
+  background:transparent !important;
+  color:var(--text) !important;
+  padding:4px 0 8px !important;
+  border-radius:0 !important;
+  font-size:28px !important;
+  font-weight:600;
+  letter-spacing:-0.02em;
+  text-align:center;
+}
+
+.nav button{
+  border:1px solid #8d958a !important;
+  padding:9px 18px !important;
+  border-radius:8px !important;
+  background:#ffffff !important;
+  color:#525a50 !important;
+  box-shadow:none !important;
+  opacity:1 !important;
+  font-weight:600;
+}
+
+.nav button:hover{
+  background:#eef0eb !important;
+}
+
+.nav button.active{
+  background:var(--accent) !important;
+  color:#ffffff !important;
+  border-color:var(--accent) !important;
+  box-shadow:0 1px 3px rgba(0,0,0,.10) !important;
+  transform:none !important;
+}
+
+.btn.ghost,
+#settingsBtn{
+  border:1px solid #c8ccc5 !important;
+  background:#ffffff !important;
+  color:#596057 !important;
+  box-shadow:none !important;
+}
+
+.btn.ghost:hover,
+#settingsBtn:hover{
+  background:#f0f1ed !important;
+}
+
+.index a{
+  color:#5e675c !important;
+  border-color:#dfe2dc !important;
+}
+
+.font-size-slider-row button{
+  background:var(--accent) !important;
+  color:#fff !important;
+  box-shadow:none !important;
+}
+
+.pwa-notice{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translate(-50%,18px);
+  z-index:9999;
+  width:min(92vw,560px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border:1px solid #cfd3cc;
+  border-radius:10px;
+  background:#fff;
+  color:var(--text);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease;
+}
+
+.pwa-notice.show{
+  opacity:1;
+  transform:translate(-50%,0);
+  pointer-events:auto;
+}
+
+.pwa-notice-actions{
+  display:flex;
+  gap:8px;
+  flex-shrink:0;
+}
+
+.pwa-notice button{
+  border:0;
+  border-radius:7px;
+  padding:8px 12px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.pwa-notice button.secondary{
+  background:#eceee9;
+  color:#525850;
+}
+
+@media (max-width:700px){
+  h1{
+    font-size:23px !important;
+    line-height:1.2;
+    padding:2px 6px 6px !important;
+  }
+
+  .nav button{
+    border-radius:7px !important;
+    padding:9px 10px !important;
+  }
+
+  .pwa-notice{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .pwa-notice-actions{
+    width:100%;
+  }
+
+  .pwa-notice-actions button{
+    flex:1;
+  }
+}
