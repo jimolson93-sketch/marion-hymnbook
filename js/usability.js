@@ -85,24 +85,31 @@
     requestAnimationFrame(() => banner.classList.add('visible'));
   }
 
-  // Floating Home / top button.
+  // Floating return-to-top control, matching Rooted behavior: only in Index or Show All.
   const home = document.createElement('button');
   home.type = 'button';
   home.className = 'mgh-home-button';
-  home.setAttribute('aria-label','Return to top');
-  home.setAttribute('title','Return to top');
+  home.setAttribute('aria-label','Back to top');
+  home.setAttribute('title','Back to top');
+  home.setAttribute('aria-hidden','true');
+  home.tabIndex = -1;
   home.textContent = '↑';
-  home.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+  home.addEventListener('click', () => window.scrollTo({
+    top:0,
+    behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+  }));
   document.body.appendChild(home);
 
   function syncHomeButton(){
-    const bookSelected = !!document.querySelector('.nav button.active');
-    home.classList.toggle('visible', bookSelected && window.scrollY > 450);
+    const inIndex = document.getElementById('indexBtn')?.classList.contains('active');
+    const inAll = document.getElementById('showAllBtn')?.classList.contains('active');
+    const visible = !!(inIndex || inAll) && window.scrollY > 420;
+    home.classList.toggle('visible',visible);
+    home.setAttribute('aria-hidden',String(!visible));
+    home.tabIndex = visible ? 0 : -1;
   }
-  window.addEventListener('scroll', syncHomeButton, {passive:true});
-  document.addEventListener('click', e => {
-    if (e.target.closest('.nav button')) setTimeout(syncHomeButton, 20);
-  });
+  window.addEventListener('scroll',syncHomeButton,{passive:true});
+  document.addEventListener('click',() => setTimeout(syncHomeButton,20));
 
   // Save and restore the last hymnbook. Existing app behavior remains responsible for clearing search/results.
   document.addEventListener('mgh:data-ready', () => {
