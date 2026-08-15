@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mgh-hymnbook-v19';
+const CACHE_NAME = 'mgh-hymnbook-v20';
 const APP_ASSETS = [
   './','./index.html','./css/styles.css','./css/theme.css','./css/reading-enhancements.css','./css/startup-guidance.css','./css/search-enhancements.css','./css/view-tools.css','./js/bootstrap.js','./js/app.js','./js/reading-enhancements.js','./js/startup-guidance.js','./js/search-enhancements.js','./js/view-tools.js','./js/pwa.js','./data/new-believers.html','./data/gospel.html','./manifest.webmanifest','./icons/app-icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
 ];
