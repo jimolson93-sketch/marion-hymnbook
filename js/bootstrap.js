@@ -1,80 +1,49 @@
 (() => {
-  const believersParts = [
-    'data/believers-repair/01-01.txt',
-    'data/believers-repair/01-02.txt',
-    'data/believers-repair/01-03a.txt',
-    'data/believers-repair/01-03b.txt',
-    'data/believers-parts/part-02.txt',
-    'data/believers-parts/part-03.txt',
-    'data/believers-parts/part-04.txt',
-    'data/believers-parts/part-05.txt',
-    'data/believers-parts/part-06.txt',
-    'data/believers-parts/part-07.txt',
-    'data/believers-parts/part-08.txt',
-    'data/believers-parts/part-09.txt',
-    'data/believers-repair/10-a.txt',
-    'data/believers-repair/11-01.txt',
-    'data/believers-repair/11-02.txt',
-    'data/believers-repair/11-03.txt',
-    'data/believers-repair/11-04.txt',
-    'data/believers-repair/11-05.txt'
-  ];
-
   const books = [
     { id: 'section1', url: 'data/new-believers.html' },
     { id: 'section2', url: 'data/gospel.html' },
-    { id: 'section3', parts: believersParts }
+    { id: 'section3', url: 'data/believers.html', idPrefix: 'believers-' }
   ];
 
-  function showLoadError(message) {
-    document.querySelectorAll('.data-loading').forEach(el => {
-      el.textContent = message;
-      el.classList.add('data-load-error');
-    });
-  }
-
-  function base64ToBytes(base64) {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes;
-  }
-
-  async function loadCompressedBook(parts) {
-    if (typeof DecompressionStream === 'undefined') {
-      throw new Error('This browser cannot decompress the Believers hymn data.');
-    }
-
-    const responses = await Promise.all(parts.map(file => fetch(file, { cache: 'default' })));
-    const failed = responses.find(response => !response.ok);
-    if (failed) throw new Error(`Believers hymn data request failed: ${failed.status}`);
-
-    const chunks = await Promise.all(responses.map(response => response.text()));
-    const encoded = chunks.map(text => text.trim()).join('');
-    const compressed = base64ToBytes(encoded);
-    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
-    return new Response(stream).text();
+  function showBookLoadError(section, error) {
+    console.error(error);
+    if (!section) return;
+    const loading = section.querySelector('.data-loading') || section;
+    loading.textContent = 'Unable to load this hymn book. Please refresh the page.';
+    loading.classList.add('data-load-error');
   }
 
   async function loadBook(book) {
-    if (book.parts) return loadCompressedBook(book.parts);
+    const section = document.getElementById(book.id);
+    if (!section) {
+      console.error(`Missing section: ${book.id}`);
+      return;
+    }
 
-    const response = await fetch(book.url, { cache: 'default' });
-    if (!response.ok) throw new Error(`Hymn data request failed: ${response.status}`);
-    return response.text();
+    try {
+      const response = await fetch(book.url, { cache: 'default' });
+      if (!response.ok) throw new Error(`Hymn data request failed: ${response.status}`);
+
+      let fragment = await response.text();
+
+      // The three books share hymn numbers. Give Believers unique DOM ids so
+      // index links always stay inside the selected book.
+      if (book.idPrefix) {
+        fragment = fragment.replace(/id="hymn-/g, `id="${book.idPrefix}hymn-`);
+      }
+
+      section.innerHTML = fragment;
+    } catch (error) {
+      showBookLoadError(section, error);
+    }
   }
 
   async function loadHymnBooks() {
-    try {
-      const fragments = await Promise.all(books.map(loadBook));
-      books.forEach((book, index) => {
-        const section = document.getElementById(book.id);
-        if (!section) throw new Error(`Missing section: ${book.id}`);
-        section.innerHTML = fragments[index];
-      });
+    // Each book handles its own failure so one bad data file can never prevent
+    // the other hymn books from loading.
+    await Promise.all(books.map(loadBook));
 
+    try {
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = 'js/app.js';
@@ -86,7 +55,6 @@
       document.dispatchEvent(new Event('mgh:data-ready'));
     } catch (error) {
       console.error(error);
-      showLoadError('Unable to load hymns. Please refresh the page.');
     }
   }
 
