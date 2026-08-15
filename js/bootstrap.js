@@ -2,7 +2,8 @@
   const believersParts = [
     'data/believers-repair/01-01.txt',
     'data/believers-repair/01-02.txt',
-    'data/believers-repair/01-03.txt',
+    'data/believers-repair/01-03a.txt',
+    'data/believers-repair/01-03b.txt',
     'data/believers-parts/part-02.txt',
     'data/believers-parts/part-03.txt',
     'data/believers-parts/part-04.txt',
@@ -12,9 +13,6 @@
     'data/believers-parts/part-08.txt',
     'data/believers-parts/part-09.txt',
     'data/believers-repair/10-a.txt',
-    'data/believers-repair/10-03.txt',
-    'data/believers-repair/10-04.txt',
-    'data/believers-repair/10-05.txt',
     'data/believers-repair/11-01.txt',
     'data/believers-repair/11-02.txt',
     'data/believers-repair/11-03.txt',
@@ -85,7 +83,6 @@
         document.body.appendChild(script);
       });
 
-      // Run only the handlers that originally waited for DOMContentLoaded.
       document.dispatchEvent(new Event('mgh:data-ready'));
     } catch (error) {
       console.error(error);
