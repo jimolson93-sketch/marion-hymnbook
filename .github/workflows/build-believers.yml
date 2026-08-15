@@ -5,7 +5,7 @@ on:
     branches:
       - chatgpt/pwa-foundation
     paths:
-      - data/believers-build/READY
+      - data/believers-repair/BUILD_READY
 
 permissions:
   contents: write
@@ -21,25 +21,40 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import base64, gzip, re, shutil
+          import base64, gzip, re
 
-          build = Path('data/believers-build')
-          parts = sorted(build.glob('part-*.txt'))
-          if not parts:
-              raise SystemExit('No Believers build parts found')
-          encoded = ''.join(p.read_text(encoding='utf-8').strip() for p in parts)
+          parts = [
+              'data/believers-repair/01-01.txt',
+              'data/believers-repair/01-02.txt',
+              'data/believers-repair/01-03a.txt',
+              'data/believers-repair/01-03b.txt',
+              'data/believers-parts/part-02.txt',
+              'data/believers-parts/part-03.txt',
+              'data/believers-parts/part-04.txt',
+              'data/believers-parts/part-05.txt',
+              'data/believers-parts/part-06.txt',
+              'data/believers-parts/part-07.txt',
+              'data/believers-parts/part-08.txt',
+              'data/believers-parts/part-09.txt',
+              'data/believers-repair/10-a.txt',
+              'data/believers-repair/11-01.txt',
+              'data/believers-repair/11-02.txt',
+              'data/believers-repair/11-03.txt',
+              'data/believers-repair/11-04.txt',
+              'data/believers-repair/11-05.txt',
+          ]
+          encoded = ''.join(Path(p).read_text(encoding='utf-8').strip() for p in parts)
           html = gzip.decompress(base64.b64decode(encoded)).decode('utf-8')
           count = len(re.findall(r'<article class="hymn"', html))
           if count != 465:
               raise SystemExit(f'Expected 465 hymns, found {count}')
-          if 'id="believers-hymn-1"' not in html or 'id="believers-hymn-465"' not in html:
+          if 'id="hymn-1"' not in html or 'id="hymn-465"' not in html:
               raise SystemExit('Believers hymn range validation failed')
           Path('data/believers.html').write_text(html, encoding='utf-8')
-          shutil.rmtree(build)
       - name: Commit generated Believers file
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/believers.html data/believers-build
+          git add data/believers.html
           git commit -m "Build single Believers hymn data file"
           git push origin HEAD:chatgpt/pwa-foundation
