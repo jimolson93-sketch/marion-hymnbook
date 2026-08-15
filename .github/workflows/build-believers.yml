@@ -1,17 +1,16 @@
 name: Build Believers hymn data
 
 on:
-  push:
-    branches:
-      - chatgpt/pwa-foundation
-    paths:
-      - data/believers-repair/BUILD_READY
+  workflow_run:
+    workflows: ["pages-build-deployment"]
+    types: [completed]
 
 permissions:
   contents: write
 
 jobs:
   build:
+    if: github.event.workflow_run.head_branch == 'chatgpt/pwa-foundation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +54,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- data/believers.html; then
+            echo "No Believers data change needed"
+            exit 0
+          fi
           git add data/believers.html
           git commit -m "Build single Believers hymn data file"
           git push origin HEAD:chatgpt/pwa-foundation
