@@ -47,7 +47,7 @@ jobs:
               173: [('Upon the alter laid.', 'Upon the altar laid.')],
               176: [('But Thou has drained the last dark drop,', 'But Thou hast drained the last dark drop,')],
               187: [('faithfullness', 'faithfulness')],
-              202: [('faithfullness', 'faithfulness'), ('unfaithfullness', 'unfaithfulness')],
+              202: [('unfaithfullness', 'unfaithfulness'), ('Thy faithfullness to God.', 'Thy faithfulness to God.')],
               205: [('Thou has bought us', 'Thou hast bought us')],
               254: [('Thou wilt head us,', 'Thou wilt heed us,')],
               279: [
@@ -80,7 +80,6 @@ jobs:
           applied = []
           for hymn, changes in corrections.items():
               start, end, article = article_bounds(text, hymn)
-              original = article
               for old, new in changes:
                   count = article.count(old)
                   if count != 1:
@@ -89,13 +88,11 @@ jobs:
                   applied.append((hymn, old, new))
               text = text[:start] + article + text[end:]
 
-          # Structural validation: preserve all 465 hymns.
           count = len(re.findall(r'<article class="hymn"', text))
           if count != 465:
               raise SystemExit(f'Expected 465 hymns after edits, found {count}')
           path.write_text(text, encoding='utf-8')
 
-          # Bump visible app version and service-worker cache so iPhones receive corrections.
           index = Path('index.html')
           idx = index.read_text(encoding='utf-8')
           if 'v1.1.1' not in idx:
