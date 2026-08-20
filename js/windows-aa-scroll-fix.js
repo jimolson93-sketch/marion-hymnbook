@@ -4,17 +4,11 @@
   if (!btn) return;
 
   btn.addEventListener('pointerdown', () => {
-    const x = window.scrollX;
-    const y = window.scrollY;
-
-    // Cancel any lingering smooth-scroll animation from Enter/search before
-    // the Aa click changes focus or layout. This is mainly for Chrome/Windows.
+    // On desktop, make Aa behave exactly like it does at the top of the page.
+    // Cancel any lingering search smooth-scroll, clear focus, then place the
+    // page at the top before the normal click handler opens the drawer.
     const active = document.activeElement;
     if (active && active !== document.body && typeof active.blur === 'function') active.blur();
-    window.scrollTo({ left: x, top: y, behavior: 'auto' });
-
-    requestAnimationFrame(() => {
-      window.scrollTo({ left: x, top: y, behavior: 'auto' });
-    });
+    window.scrollTo({ left: 0, top: 0, behavior: 'auto' });
   }, true);
 })();
