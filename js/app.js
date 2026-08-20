@@ -194,40 +194,25 @@ document.addEventListener("mgh:data-ready", () => {
   const btn = document.getElementById('settingsBtn');
   const drawer = document.getElementById('settingsDrawer');
   if (!btn || !drawer) return;
-  let restoringScroll = false;
+  const isDesktop = window.matchMedia('(min-width:701px)').matches;
 
-  function preserveScroll(action){
-    const x = window.scrollX;
-    const y = window.scrollY;
-    action();
-    restoringScroll = true;
-    window.scrollTo(x, y);
-    requestAnimationFrame(() => {
-      window.scrollTo(x, y);
-      requestAnimationFrame(() => {
-        window.scrollTo(x, y);
-        restoringScroll = false;
-      });
-    });
-  }
-
-  function setOpen(open, keepScroll = false){
-    const apply = () => {
-      drawer.classList.toggle('open', open);
-      btn.classList.toggle('active', open);
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
-    };
-    if (keepScroll) preserveScroll(apply); else apply();
+  function setOpen(open){
+    drawer.classList.toggle('open', open);
+    btn.classList.toggle('active', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
   }
 
   function close(){ if (drawer.classList.contains('open')) setOpen(false); }
   setOpen(false);
+
   btn.addEventListener('click', function(e){
     e.preventDefault();
     e.stopPropagation();
-    setOpen(!drawer.classList.contains('open'), true);
+    // Aa is a pure toggle. It never changes scroll position or focus.
+    setOpen(!drawer.classList.contains('open'));
   });
+
   drawer.addEventListener('click', e => e.stopPropagation());
   drawer.addEventListener('pointerdown', e => e.stopPropagation());
   document.addEventListener('pointerdown', function(e){
@@ -235,8 +220,13 @@ document.addEventListener("mgh:data-ready", () => {
     if (drawer.contains(e.target) || btn.contains(e.target)) return;
     close();
   });
-  window.addEventListener('scroll', function(){
-    if (restoringScroll || !drawer.classList.contains('open')) return;
-    close();
-  }, { passive:true });
+
+  // Keep the established mobile behavior, but desktop scrolling must never
+  // close/reopen the drawer or participate in the Aa interaction.
+  if (!isDesktop) {
+    window.addEventListener('scroll', function(){
+      if (!drawer.classList.contains('open')) return;
+      close();
+    }, { passive:true });
+  }
 })();
