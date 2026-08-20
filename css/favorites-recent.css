@@ -1,19 +1,32 @@
 .hymn h3{
   position:relative;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
 }
 
-.hymn.is-favorite h3::after{
+/* Saved hymn marker: a quiet page-edge style rule beside the title. */
+.hymn.is-favorite h3::before{
   content:"";
-  display:block;
-  width:54px;
-  height:2px;
-  margin:10px auto 0;
+  position:absolute;
+  left:0;
+  top:12%;
+  bottom:12%;
+  width:3px;
   border-radius:999px;
   background:var(--accent);
-  opacity:.75;
+  opacity:.9;
 }
 
-.hymn h3{
+/* Interactive UI should behave like controls rather than selectable page text. */
+.nav,
+.search-row button,
+#settingsDrawer button,
+.index-view-tabs,
+.index-view-content > a,
+.saved-index-book-heading{
+  -webkit-user-select:none;
+  user-select:none;
   -webkit-touch-callout:none;
 }
 
@@ -94,6 +107,13 @@
 .saved-index-empty span{
   font-size:13px;
   line-height:1.4;
+}
+
+@media (min-width:701px){
+  .hymn.is-favorite h3::before{
+    width:4px;
+    left:-2px;
+  }
 }
 
 @media (max-width:600px){
