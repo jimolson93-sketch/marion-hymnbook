@@ -83,14 +83,14 @@
     refreshSavedIndexIfVisible();
   }
 
-  function recordRecent(hymn) {
+  function recordRecent(hymn, refresh = true) {
     const info = hymnInfo(hymn);
     if (!info) return;
     recent = recent.filter(item => item.key !== info.key);
     recent.unshift(info);
     recent = recent.slice(0, RECENT_LIMIT);
     writeList(RECENT_KEY, recent);
-    refreshSavedIndexIfVisible();
+    if (refresh) refreshSavedIndexIfVisible();
   }
 
   function clearHold() {
@@ -156,7 +156,7 @@
     });
   }
 
-  function openSavedEntry(event, record, link) {
+  function openIndexEntry(event, record, link) {
     event.preventDefault();
     event.stopPropagation();
     const index = link.closest('.index');
@@ -176,13 +176,13 @@
     link.insertAdjacentElement('afterend', drawer);
     link.classList.add('index-expanded');
     link.setAttribute('aria-expanded', 'true');
-    recordRecent(target);
+    recordRecent(target, false);
   }
 
-  function makeEntry(record, includeBook) {
+  function makeEntry(record, includeBook, extraClass = 'saved-index-entry') {
     const link = document.createElement('a');
     link.href = '#';
-    link.className = 'index-entry saved-index-entry' + (includeBook ? ' has-book-label' : '');
+    link.className = 'index-entry ' + extraClass + (includeBook ? ' has-book-label' : '');
     link.setAttribute('aria-expanded', 'false');
 
     const number = document.createElement('span');
@@ -203,13 +203,12 @@
       link.appendChild(book);
     }
 
-    link.addEventListener('click', event => openSavedEntry(event, record, link));
+    link.addEventListener('click', event => openIndexEntry(event, record, link));
     return link;
   }
 
   function ensureIndexShell(index) {
     if (!index || index.dataset.savedViewsReady === 'true') return;
-    const existing = Array.from(index.children);
 
     const tabs = document.createElement('div');
     tabs.className = 'index-view-tabs';
@@ -232,7 +231,6 @@
 
     const content = document.createElement('div');
     content.className = 'index-view-content';
-    existing.forEach(node => content.appendChild(node));
     index.replaceChildren(tabs, content);
     index.dataset.savedViewsReady = 'true';
     index.dataset.indexMode = 'all';
@@ -255,19 +253,7 @@
     const fragment = document.createDocumentFragment();
     section.querySelectorAll('.hymn').forEach(hymn => {
       const info = hymnInfo(hymn);
-      if (!info) return;
-      const link = document.createElement('a');
-      link.href = '#' + hymn.id;
-      link.className = 'index-entry';
-      const number = document.createElement('span');
-      number.className = 'index-number';
-      number.textContent = info.number;
-      const title = document.createElement('span');
-      title.className = 'index-title';
-      title.textContent = info.title;
-      title.dataset.fullTitle = info.title;
-      link.append(number, title);
-      fragment.appendChild(link);
+      if (info) fragment.appendChild(makeEntry(info, false, 'book-index-entry'));
     });
     content.replaceChildren(fragment);
   }
@@ -358,15 +344,5 @@
     document.addEventListener('click', event => {
       if (event.target.closest('#indexBtn')) setTimeout(setupVisibleIndex, 30);
     });
-
-    document.addEventListener('click', event => {
-      const link = event.target.closest('.index-view-content > a:not(.saved-index-entry)');
-      if (!link) return;
-      const section = link.closest('.section');
-      const href = link.getAttribute('href') || '';
-      if (!section || !href.startsWith('#')) return;
-      const target = section.querySelector(href);
-      if (target) recordRecent(target);
-    }, true);
   }, { once: true });
 })();
