@@ -16,15 +16,19 @@
 
 .appearance-options{
   display:flex;
-  width:100%;
+  justify-content:center;
+  width:min(100%,260px);
+  margin:0 auto;
   gap:6px;
-  padding:0 1px;
 }
 
-.appearance-option{
+/* More specific than the older generic .font-size-controls button rule so
+   these stay intentionally compact rather than inheriting the A-/A+ size. */
+.font-size-controls .appearance-option{
   flex:1 1 0;
-  min-height:32px;
-  height:32px;
+  min-width:0;
+  min-height:30px;
+  height:30px;
   padding:0 8px;
   border:1px solid #d3d6d0;
   border-radius:7px;
@@ -37,7 +41,7 @@
   cursor:pointer;
 }
 
-.appearance-option.active{
+.font-size-controls .appearance-option.active{
   border-color:#747d72;
   background:#747d72;
   color:#fff;
@@ -241,6 +245,24 @@ html[data-theme="dark"] .mobile-scroll-fade.top{
 
 html[data-theme="dark"] .mobile-scroll-fade.bottom{
   background:linear-gradient(to top, rgba(29,33,30,.80), rgba(29,33,30,0));
+}
+
+/* PWA install/offline/cache status notices must follow dark mode too. */
+html[data-theme="dark"] .pwa-notice{
+  border-color:#454c46 !important;
+  background:#272c28 !important;
+  color:#e7e9e5 !important;
+  box-shadow:0 8px 24px rgba(0,0,0,.30) !important;
+}
+
+html[data-theme="dark"] .pwa-notice button{
+  background:#828c80 !important;
+  color:#151815 !important;
+}
+
+html[data-theme="dark"] .pwa-notice button.secondary{
+  background:#333934 !important;
+  color:#d9ddd7 !important;
 }
 
 html[data-theme="dark"] ::selection{
