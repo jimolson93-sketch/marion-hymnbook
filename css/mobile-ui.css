@@ -69,7 +69,7 @@
     left:50%;
     width:230px;
     max-width:calc(100vw - 40px);
-    transform:translate(-50%, calc(var(--selected-index, 0) * -40px));
+    transform:translateX(-50%);
     overflow:hidden;
     border:1px solid #d9ddd6;
     border-radius:11px;
