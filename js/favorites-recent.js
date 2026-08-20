@@ -4,6 +4,7 @@
   const RECENT_LIMIT = 10;
   const HOLD_MS = 650;
   const MOVE_CANCEL_PX = 12;
+  const SEARCH_RECENT_DELAY_MS = 450;
 
   const BOOKS = {
     section1: { name: 'New Believers Hymns', short: 'New Believers' },
@@ -18,6 +19,7 @@
   let holdStartX = 0;
   let holdStartY = 0;
   let recentTimer = null;
+  let searchRecentTimer = null;
 
   function readList(key) {
     try {
@@ -124,11 +126,31 @@
     return Array.from(document.querySelectorAll('.section')).find(section => !section.classList.contains('hidden')) || null;
   }
 
-  function recordVisibleRecent() {
+  function visibleSingleHymn() {
     const section = activeSection();
-    if (!section || document.body.classList.contains('show-all-mode')) return;
+    if (!section || document.body.classList.contains('show-all-mode')) return null;
     const visible = Array.from(section.querySelectorAll('.hymn.show')).filter(hymn => getComputedStyle(hymn).display !== 'none');
-    if (visible.length === 1) recordRecent(visible[0]);
+    return visible.length === 1 ? visible[0] : null;
+  }
+
+  function recordVisibleRecent() {
+    const hymn = visibleSingleHymn();
+    if (hymn) recordRecent(hymn);
+  }
+
+  function recordVisibleRecentForSearch() {
+    const search = document.getElementById('searchInput');
+    const hymn = visibleSingleHymn();
+    if (!search || !hymn) return;
+    const query = search.value.trim();
+    if (!/^\d+$/.test(query)) return;
+    const info = hymnInfo(hymn);
+    if (info?.number === query) recordRecent(hymn);
+  }
+
+  function scheduleSearchRecent() {
+    clearTimeout(searchRecentTimer);
+    searchRecentTimer = setTimeout(recordVisibleRecentForSearch, SEARCH_RECENT_DELAY_MS);
   }
 
   function scheduleVisibleRecent() {
@@ -349,9 +371,19 @@
 
     const search = document.getElementById('searchInput');
     if (search) {
-      search.addEventListener('blur', () => setTimeout(recordVisibleRecent, 80));
+      search.addEventListener('input', () => {
+        if (/^\d+$/.test(search.value.trim())) scheduleSearchRecent();
+        else clearTimeout(searchRecentTimer);
+      }, true);
+      search.addEventListener('blur', () => {
+        clearTimeout(searchRecentTimer);
+        setTimeout(recordVisibleRecentForSearch, 80);
+      });
       search.addEventListener('keydown', event => {
-        if (event.key === 'Enter') setTimeout(recordVisibleRecent, 100);
+        if (event.key === 'Enter') {
+          clearTimeout(searchRecentTimer);
+          setTimeout(recordVisibleRecentForSearch, 100);
+        }
       }, true);
     }
 
