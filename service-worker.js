@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'mgh-hymnbook-';
-const CACHE_VERSION = '1.2.3';
+const CACHE_VERSION = '1.2.4';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -85,12 +85,12 @@ self.addEventListener('fetch', event => {
 
   if (event.request.mode === 'navigate') {
     event.respondWith(fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(cacheName(CACHE_VERSION)).then(cache => cache.put('./index.html', copy));
+      const copy=response.clone();
+      caches.open(cacheName(CACHE_VERSION)).then(cache=>cache.put('./index.html',copy));
       return response;
-    }).catch(() => caches.match('./index.html').then(response => response || caches.match('./'))));
+    }).catch(()=>caches.match('./index.html').then(response=>response||caches.match('./'))));
     return;
   }
 
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));
 });
