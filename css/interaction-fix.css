@@ -1,0 +1,26 @@
+/* Keep utility button states crisp on touch devices. */
+#indexBtn.active,
+#showAllBtn.active,
+#settingsBtn.active{
+  background:var(--accent) !important;
+  color:#fff !important;
+  border-color:var(--accent) !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+
+@media (hover:none){
+  .utility-row > button:hover{
+    background:rgba(255,255,255,.72) !important;
+    color:#5c625a !important;
+    border-color:#d3d6d0 !important;
+  }
+
+  #indexBtn.active:hover,
+  #showAllBtn.active:hover,
+  #settingsBtn.active:hover{
+    background:var(--accent) !important;
+    color:#fff !important;
+    border-color:var(--accent) !important;
+  }
+}
