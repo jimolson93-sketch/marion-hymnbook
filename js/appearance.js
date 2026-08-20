@@ -44,10 +44,6 @@
     const wrap = document.createElement('div');
     wrap.className = 'appearance-controls';
 
-    const label = document.createElement('div');
-    label.className = 'appearance-label';
-    label.textContent = 'Appearance';
-
     const options = document.createElement('div');
     options.className = 'appearance-options';
     options.setAttribute('role', 'group');
@@ -64,7 +60,7 @@
       options.appendChild(button);
     });
 
-    wrap.append(label, options);
+    wrap.append(options);
     const version = fontControls.querySelector('.app-version');
     if (version) fontControls.insertBefore(wrap, version);
     else fontControls.appendChild(wrap);
