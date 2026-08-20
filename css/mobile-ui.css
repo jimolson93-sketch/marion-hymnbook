@@ -10,63 +10,80 @@
 
   .mobile-book-picker{
     display:block;
-    width:230px;
+    position:relative;
+    align-self:center;
+    width:auto;
     max-width:calc(100vw - 40px);
-    margin:0 auto;
+    z-index:45;
   }
 
   .mobile-book-picker-toggle{
     display:flex;
     align-items:center;
     justify-content:center;
-    width:100%;
+    gap:7px;
+    width:auto;
     min-height:40px;
-    padding:7px 12px;
-    border:1px solid #c9cec6;
-    border-radius:8px;
-    background:rgba(255,255,255,.72);
-    color:#525a50;
+    margin:0 auto;
+    padding:7px 10px;
+    border:1px solid transparent;
+    border-radius:10px;
+    background:transparent;
+    color:#596057;
     font:inherit;
     font-size:15px;
     font-weight:600;
-    text-align:center;
+    line-height:1.15;
     cursor:pointer;
+    transition:background .16s ease, border-color .16s ease, box-shadow .16s ease;
   }
 
   .mobile-book-picker-toggle::after{
     content:'▾';
-    margin-left:8px;
     color:#747d72;
-    font-size:11px;
+    font-size:10px;
+    transform-origin:center;
     transition:transform .18s ease;
   }
 
-  .mobile-book-picker.open .mobile-book-picker-toggle::after{
-    transform:rotate(180deg);
+  .mobile-book-picker.open .mobile-book-picker-toggle{
+    position:relative;
+    z-index:2;
+    width:230px;
+    max-width:calc(100vw - 40px);
+    justify-content:space-between;
+    padding-left:14px;
+    padding-right:14px;
+    border-color:#d9ddd6;
+    border-radius:11px 11px 0 0;
+    background:#fff;
+    box-shadow:0 7px 20px rgba(47,51,47,.10);
   }
 
-  .mobile-book-picker.has-selection .mobile-book-picker-toggle{
-    border-color:#b5bbb2;
-    color:#424941;
+  .mobile-book-picker.open .mobile-book-picker-toggle::after{
+    content:'✓';
+    font-size:13px;
+    transform:none;
   }
 
   .mobile-book-picker-drawer{
-    width:100%;
-    max-height:0;
-    margin-top:0;
+    display:none;
+    position:absolute;
+    top:100%;
+    left:50%;
+    width:230px;
+    max-width:calc(100vw - 40px);
+    transform:translateX(-50%);
     overflow:hidden;
-    opacity:0;
-    transform:translateY(-4px);
-    border-radius:8px;
-    box-shadow:0 6px 16px rgba(0,0,0,.06);
-    transition:max-height .22s ease, opacity .16s ease, transform .22s ease, margin .22s ease;
+    border:1px solid #d9ddd6;
+    border-top:0;
+    border-radius:0 0 11px 11px;
+    background:#fff;
+    box-shadow:0 12px 24px rgba(47,51,47,.12);
   }
 
   .mobile-book-picker.open .mobile-book-picker-drawer{
-    max-height:150px;
-    margin-top:5px;
-    opacity:1;
-    transform:translateY(0);
+    display:block;
   }
 
   .mobile-book-picker-option{
@@ -74,25 +91,28 @@
     width:100%;
     min-height:40px;
     margin:0;
-    padding:8px 12px;
+    padding:8px 14px;
     border:0;
-    border-bottom:1px solid #e5e7e2;
-    background:#fafaf8;
-    color:#525a50;
+    border-top:1px solid #eceee9;
+    background:#fff;
+    color:#596057;
     font:inherit;
     font-size:14px;
-    font-weight:550;
-    text-align:center;
+    font-weight:500;
+    text-align:left;
     cursor:pointer;
   }
 
-  .mobile-book-picker-option:last-child{
-    border-bottom:0;
+  .mobile-book-picker-option:first-child{
+    border-top:0;
   }
 
   .mobile-book-picker-option.active{
-    background:#747d72;
-    color:#fff;
+    display:none;
+  }
+
+  .mobile-book-picker-option:active{
+    background:#f1f3ef;
   }
 
   .mobile-scroll-fade{
@@ -123,7 +143,7 @@
 }
 
 @media (prefers-reduced-motion:reduce){
-  .mobile-book-picker-drawer,
+  .mobile-book-picker-toggle,
   .mobile-book-picker-toggle::after,
   .mobile-scroll-fade{
     transition:none !important;
