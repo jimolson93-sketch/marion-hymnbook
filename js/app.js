@@ -161,7 +161,7 @@ document.addEventListener("mgh:data-ready", () => {
   } catch(e){
     if (isMobile){
       const activeBtn = document.querySelector('.nav button.active');
-      const target = activeBtn ? activeBtn.dataset.target : '';
+      const target = activeBtn?activeBtn.dataset.target:'';
       startingValue = (target === 'section2') ? 70 : 75;
     }
   }
@@ -225,11 +225,35 @@ document.addEventListener("mgh:data-ready", () => {
     drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
   }
 
+  function close(){
+    if (drawer.classList.contains('open')) setOpen(false);
+  }
+
   setOpen(false);
 
-  btn.addEventListener('click', function(){
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
     setOpen(!drawer.classList.contains('open'));
   });
+
+  // Keep the drawer open while the user is adjusting size or appearance.
+  drawer.addEventListener('click', function(e){
+    e.stopPropagation();
+  });
+  drawer.addEventListener('pointerdown', function(e){
+    e.stopPropagation();
+  });
+
+  // Once the user interacts elsewhere, the settings are no longer the focus.
+  document.addEventListener('pointerdown', function(e){
+    if (!drawer.classList.contains('open')) return;
+    if (drawer.contains(e.target) || btn.contains(e.target)) return;
+    close();
+  });
+
+  // Scrolling the page means the user has returned to reading. Pointer activity
+  // inside the drawer itself does not scroll the page, so slider use stays open.
+  window.addEventListener('scroll', close, { passive:true });
 })();
 
 (function(){
@@ -238,213 +262,25 @@ document.addEventListener("mgh:data-ready", () => {
 
   if (!indexBtn || !showAllBtn) return;
 
-  function activeSection(){
-    return Array.from(document.querySelectorAll('.section')).find(s =>
-      !s.classList.contains('hidden') && getComputedStyle(s).display !== 'none'
-    );
+  function setActive(button, active){
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
   }
 
-  function clearUtilityStates(){
-    indexBtn.classList.remove('active');
-    showAllBtn.classList.remove('active');
-  }
-
-  // Keep button state synced when another action changes the view.
-  document.addEventListener('click', function(e){
-    if (e.target.closest('.index a')) {
-      clearUtilityStates();
-    }
-    if (e.target.closest('.nav button')) {
-      clearUtilityStates();
-    }
-    if (e.target.closest('#searchBtn')) {
-      clearUtilityStates();
-    }
+  indexBtn.addEventListener('click', function(){
+    setActive(indexBtn, true);
+    setActive(showAllBtn, false);
   });
 
-  // Capture the clicks first so we can turn Index and Show All into true toggles.
-  indexBtn.addEventListener('click', function(e){
-    const section = activeSection();
-    if (!section) return;
-
-    const index = section.querySelector('.index');
-    if (!index) return;
-
-    const isOpen = index.classList.contains('show');
-
-    if (isOpen) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      index.classList.remove('show');
-      index.setAttribute('aria-hidden','true');
-      indexBtn.classList.remove('active');
-      return;
-    }
-
-    // Let the page's existing Index behavior run, then sync appearance.
-    setTimeout(function(){
-      clearUtilityStates();
-      indexBtn.classList.add('active');
-    }, 0);
-  }, true);
-
-  showAllBtn.addEventListener('click', function(e){
-    const section = activeSection();
-    if (!section) return;
-
-    const hymns = Array.from(section.querySelectorAll('.hymn'));
-    const allShown = hymns.length > 0 && hymns.every(h => h.classList.contains('show'));
-
-    if (showAllBtn.classList.contains('active') || allShown) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      hymns.forEach(h => h.classList.remove('show'));
-      const index = section.querySelector('.index');
-      if (index) {
-        index.classList.remove('show');
-        index.setAttribute('aria-hidden','true');
-      }
-
-      showAllBtn.classList.remove('active');
-      return;
-    }
-
-    // Let the existing Show All behavior run, then mark the button active.
-    setTimeout(function(){
-      clearUtilityStates();
-      showAllBtn.classList.add('active');
-    }, 0);
-  }, true);
-})();
-
-(function(){
-  const navButtons = document.querySelectorAll('.nav button');
-  const sections = document.querySelectorAll('.section');
-  const searchRow = document.querySelector('.search-row');
-  const settingsDrawer = document.getElementById('settingsDrawer');
-
-  // Neutral startup state: no book appears selected.
-  navButtons.forEach(btn => btn.classList.remove('active'));
-
-  // Hide both hymn-book sections until a selection is made.
-  sections.forEach(section => section.classList.add('hidden'));
-
-  // Hide controls until a hymn book is chosen.
-  if (searchRow) searchRow.style.display = 'none';
-
-  // Keep settings closed at startup as well.
-  if (settingsDrawer) {
-    settingsDrawer.classList.remove('open');
-    settingsDrawer.setAttribute('aria-hidden', 'true');
-  }
-})();
-
-(function(){
-  const showAllBtn = document.getElementById('showAllBtn');
-  const searchBtn = document.getElementById('searchBtn');
-  const indexBtn = document.getElementById('indexBtn');
-  const navButtons = document.querySelectorAll('.nav button');
-
-  if (!showAllBtn) return;
-
-  function setShowAllMode(on){
-    document.body.classList.toggle('show-all-mode', !!on);
-  }
-
-  // Sync after Show All's existing behavior runs.
   showAllBtn.addEventListener('click', function(){
-    setTimeout(function(){
-      setShowAllMode(showAllBtn.classList.contains('active'));
-    }, 0);
+    setActive(showAllBtn, true);
+    setActive(indexBtn, false);
   });
 
-  // Any action that leaves Show All view restores normal spacing.
-  if (searchBtn) searchBtn.addEventListener('click', function(){ setShowAllMode(false); });
-  if (indexBtn) indexBtn.addEventListener('click', function(){
-    setTimeout(function(){
-      if (!showAllBtn.classList.contains('active')) setShowAllMode(false);
-    }, 0);
-  });
-
-  navButtons.forEach(btn => {
-    btn.addEventListener('click', function(){ setShowAllMode(false); });
-  });
-
-  document.addEventListener('click', function(e){
-    if (e.target.closest('.index a')) setShowAllMode(false);
-  });
-
-  // Start clean.
-  setShowAllMode(false);
-})();
-
-document.addEventListener('mgh:data-ready',()=>{
-  const navButtons=document.querySelectorAll('.nav button[data-target]');
-  const search=document.querySelector('.search-row input[type="text"], #searchInput, input[type="search"]');
-
-  function resetView(){
-    // Clear search box
-    if(search) search.value='';
-
-    // Hide all displayed hymns
-    document.querySelectorAll('.hymn.show').forEach(h=>h.classList.remove('show'));
-
-    // Hide any visible index
-    document.querySelectorAll('.index.show').forEach(i=>{
-      i.classList.remove('show');
-      i.setAttribute('aria-hidden','true');
+  document.querySelectorAll('.nav button').forEach(btn => {
+    btn.addEventListener('click', function(){
+      setActive(indexBtn, false);
+      setActive(showAllBtn, false);
     });
-
-    // Reset utility button states
-    ['searchBtn','indexBtn','showAllBtn'].forEach(id=>{
-      const b=document.getElementById(id);
-      if(b) b.classList.remove('active');
-    });
-
-    document.body.classList.remove('show-all-mode');
-  }
-
-  navButtons.forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      // Run after existing book-switch logic.
-      setTimeout(resetView,10);
-    });
-  });
-});
-
-(function(){
-  const searchInput = document.getElementById('searchInput');
-  const searchBtn = document.getElementById('searchBtn');
-  if (!searchInput || !searchBtn) return;
-
-  let blurTimer = null;
-
-  function scrollToVisibleHymn(){
-    setTimeout(function(){
-      const visibleHymns = Array.from(document.querySelectorAll('.hymn.show'));
-      const visibleHymn = visibleHymns.find(h => {
-        const style = getComputedStyle(h);
-        return style.display !== 'none' && h.offsetParent !== null;
-      }) || visibleHymns[0];
-
-      if (!visibleHymn) return;
-
-      const title = visibleHymn.querySelector('h3') || visibleHymn;
-      const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }, 60);
-  }
-
-  searchInput.addEventListener('blur', function(){
-    clearTimeout(blurTimer);
-
-    const value = searchInput.value.trim();
-    if (!value) return;
-
-    blurTimer = setTimeout(function(){
-      searchBtn.click();
-      scrollToVisibleHymn();
-    }, 40);
   });
 })();
