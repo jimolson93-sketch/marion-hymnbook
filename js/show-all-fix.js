@@ -6,23 +6,16 @@
 
   if (!body || !showAllBtn) return;
 
-  showAllBtn.addEventListener('click', () => {
-    body.classList.add('show-all-mode');
-  });
+  function syncShowAllMode(){
+    body.classList.toggle('show-all-mode', showAllBtn.classList.contains('active'));
+  }
 
-  indexBtn?.addEventListener('click', () => {
-    body.classList.remove('show-all-mode');
-  });
+  showAllBtn.addEventListener('click', () => setTimeout(syncShowAllMode, 0));
+  indexBtn?.addEventListener('click', () => setTimeout(syncShowAllMode, 0));
 
   document.querySelectorAll('.nav button').forEach(button => {
-    button.addEventListener('click', () => {
-      body.classList.remove('show-all-mode');
-    });
+    button.addEventListener('click', () => setTimeout(syncShowAllMode, 0));
   });
 
-  searchInput?.addEventListener('input', () => {
-    if (searchInput.value.trim().toLowerCase() !== 'all') {
-      body.classList.remove('show-all-mode');
-    }
-  });
+  searchInput?.addEventListener('input', () => setTimeout(syncShowAllMode, 0));
 })();
