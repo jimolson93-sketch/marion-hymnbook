@@ -4,6 +4,14 @@
 }
 
 @media (max-width:700px){
+  header{
+    gap:6px !important;
+  }
+
+  .controls{
+    gap:8px !important;
+  }
+
   .nav{
     display:none !important;
   }
@@ -14,7 +22,7 @@
     align-self:center;
     width:auto;
     max-width:calc(100vw - 40px);
-    margin:-5px 0 -7px;
+    margin:-7px 0 -9px;
     z-index:45;
   }
 
@@ -46,7 +54,7 @@
   }
 
   .mobile-book-picker.open{
-    margin:-5px 0 -7px;
+    margin:-7px 0 -9px;
   }
 
   .mobile-book-picker.open .mobile-book-picker-toggle{
@@ -112,6 +120,15 @@
 
   .mobile-book-picker-option:active{
     background:#f1f3ef;
+  }
+
+  .section:not(:has(.index.show, .hymn.show, .data-loading)){
+    padding:0 !important;
+    margin:0 !important;
+    min-height:0 !important;
+    background:transparent !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
   }
 
   .mobile-scroll-fade{
