@@ -1,8 +1,94 @@
-const CACHE_NAME = 'mgh-hymnbook-v24';
+'use strict';
+
+const CACHE_PREFIX = 'mgh-hymnbook-';
+const CACHE_VERSION = '1.1.3';
 const APP_ASSETS = [
-  './','./index.html','./css/styles.css','./css/theme.css','./css/reading-enhancements.css','./css/startup-guidance.css','./css/search-enhancements.css','./css/view-tools.css','./js/bootstrap.js','./js/app.js','./js/reading-enhancements.js','./js/startup-guidance.js','./js/search-enhancements.js','./js/view-tools.js','./js/pwa.js','./data/new-believers.html','./data/gospel.html','./data/believers.html','./manifest.webmanifest','./icons/app-icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './css/styles.css',
+  './css/theme.css',
+  './css/index.css',
+  './css/reading-enhancements.css',
+  './css/startup-guidance.css',
+  './css/search-enhancements.css',
+  './css/view-tools.css',
+  './js/bootstrap.js',
+  './js/app.js',
+  './js/reading-enhancements.js',
+  './js/startup-guidance.js',
+  './js/search-enhancements.js',
+  './js/view-tools.js',
+  './js/index-format.js',
+  './js/pwa.js',
+  './data/new-believers.html',
+  './data/gospel.html',
+  './data/believers.html',
+  './version.json',
+  './icons/app-icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png'
 ];
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_ASSETS)));});
-self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_NAME).map(key=>caches.delete(key)))),self.clients.claim()]));});
-self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting();});
-self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;if(request.mode==='navigate'){event.respondWith(fetch(request).then(response=>{const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',copy));return response;}).catch(()=>caches.match('./index.html')));return;}const fresh=['style','script'].includes(request.destination);if(fresh){event.respondWith(fetch(request).then(response=>{if(response&&response.status===200&&response.type!=='opaque'){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}return response;}).catch(()=>caches.match(request)));return;}event.respondWith(caches.match(request).then(cached=>{const network=fetch(request).then(response=>{if(response&&response.status===200&&response.type!=='opaque'){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(request,copy));}return response;}).catch(()=>cached);return cached||network;}));});
+
+function cacheName(version) {
+  return CACHE_PREFIX + version;
+}
+
+async function populate(version) {
+  const name = cacheName(version);
+  const cache = await caches.open(name);
+  await cache.addAll(APP_ASSETS.map(url => new Request(url, { cache: 'reload' })));
+  return name;
+}
+
+async function removeOldCaches(keep) {
+  const names = await caches.keys();
+  await Promise.all(names
+    .filter(name => name.startsWith(CACHE_PREFIX) && name !== keep)
+    .map(name => caches.delete(name)));
+}
+
+self.addEventListener('install', event => {
+  event.waitUntil(populate(CACHE_VERSION).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(removeOldCaches(cacheName(CACHE_VERSION)).then(() => self.clients.claim()));
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
+
+  if (!event.data || event.data.type !== 'REFRESH_CACHE') return;
+
+  const version = event.data.version;
+  event.waitUntil(populate(version).then(async () => {
+    const keep = cacheName(version);
+    await removeOldCaches(keep);
+    if (event.ports[0]) event.ports[0].postMessage({ ok: true });
+  }).catch(() => {
+    if (event.ports[0]) event.ports[0].postMessage({ ok: false });
+  }));
+});
+
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request).then(response => {
+      const copy = response.clone();
+      caches.open(cacheName(CACHE_VERSION)).then(cache => cache.put('./index.html', copy));
+      return response;
+    }).catch(() => caches.match('./index.html').then(response => response || caches.match('./'))));
+    return;
+  }
+
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+});
