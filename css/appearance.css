@@ -1,9 +1,14 @@
 .appearance-controls{
   width:100%;
-  margin-top:9px;
-  padding-top:9px;
+  margin-top:4px;
+  padding-top:2px;
   padding-bottom:3px;
-  border-top:1px solid rgba(154,159,152,.20);
+  border-top:0;
+}
+
+/* The Aa panel already provides the settings context, so the extra label is redundant. */
+.font-size-label{
+  display:none !important;
 }
 
 .appearance-options{
@@ -37,6 +42,11 @@
   border-color:#747d72;
   background:#747d72;
   color:#fff;
+}
+
+/* Keep the revision subtle, but readable enough to check the deployed build. */
+.app-version{
+  color:rgba(91,98,89,.64) !important;
 }
 
 /* Appearance adds a second settings row, so the drawer must be allowed to
@@ -137,13 +147,12 @@ html[data-theme="dark"] .font-size-controls{
   color:#dfe3dc !important;
 }
 
-html[data-theme="dark"] .font-size-label,
 html[data-theme="dark"] .font-size-display{
   color:#b1b8ae !important;
 }
 
-html[data-theme="dark"] .appearance-controls,
 html[data-theme="dark"] .app-version{
+  color:rgba(196,203,193,.58) !important;
   border-color:rgba(190,198,187,.16) !important;
 }
 
