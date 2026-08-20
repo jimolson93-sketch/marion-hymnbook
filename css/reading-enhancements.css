@@ -55,9 +55,11 @@
   animation:indexDrawerOpen .18s ease-out;
 }
 
+/* Match the normal .hymn typography so the zoom slider means the same thing
+   in an index drawer and in the standalone hymn view. */
 .index-hymn-drawer .verse{
-  font-size:calc(1.15em * var(--hymn-scale, 1));
-  line-height:1.42;
+  font-size:calc(1.5em * var(--hymn-scale, 1));
+  line-height:1.4;
 }
 
 .index-hymn-drawer .verse.main{
