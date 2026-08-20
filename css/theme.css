@@ -345,6 +345,14 @@ body.show-all-mode .hymn + .hymn::before{
   border:1px solid rgba(255,255,255,.5);
 }
 
+@media (max-width:600px){
+  .index a{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:clip;
+  }
+}
+
 @media (max-width:700px){
   body{padding:14px 14px 8px !important}
   .site-title-hall{font-size:18px}
