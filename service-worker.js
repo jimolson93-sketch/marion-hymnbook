@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'mgh-hymnbook-';
-const CACHE_VERSION = '1.2.26';
+const CACHE_VERSION = '1.2.27';
 const APP_ASSETS = [
   './','./index.html','./manifest.webmanifest','./css/styles.css','./css/theme.css','./css/index.css','./css/reading-enhancements.css','./css/startup-guidance.css','./css/search-enhancements.css','./css/view-tools.css','./css/mobile-ui.css','./css/appearance.css','./css/show-all-fix.css','./css/verse-number-fix.css','./css/interaction-fix.css','./css/reading-space-fix.css','./js/bootstrap.js','./js/app.js','./js/reading-enhancements.js','./js/startup-guidance.js','./js/search-enhancements.js','./js/view-tools.js','./js/index-format.js','./js/mobile-ui.js','./js/appearance.js','./js/show-all-fix.js','./js/keyboard-scroll-fix.js','./js/pwa.js','./data/new-believers.html','./data/gospel.html','./data/believers.html','./version.json','./icons/app-icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
 ];
