@@ -20,6 +20,10 @@ document.addEventListener("mgh:data-ready", () => {
     section.querySelectorAll('.index.show').forEach(index => index.classList.remove('show'));
   }
 
+  function activeSection(){
+    return document.querySelector('.section:not(.hidden)');
+  }
+
   sections.forEach(sec => sec.classList.add("hidden"));
   searchRow.style.display = "none";
   if (fontSizeRow) fontSizeRow.style.display = "none";
@@ -35,78 +39,83 @@ document.addEventListener("mgh:data-ready", () => {
       });
       searchRow.style.display = "flex";
       if (fontSizeRow) fontSizeRow.style.display = "flex";
-      document.querySelectorAll(".index.show").forEach(i => i.classList.remove("show"));
       document.body.classList.remove('show-all-mode');
+      document.querySelectorAll(".index.show").forEach(i => i.classList.remove("show"));
       setUtilityState(false, false);
     });
   });
 
-  function performSearch(query) {
-    const activeSection = document.querySelector(".section:not(.hidden)");
-    if (!activeSection) return;
-    const hymns = activeSection.querySelectorAll(".hymn");
-    const indexDiv = activeSection.querySelector(".index");
-
-    hymns.forEach(hymn => hymn.classList.remove("show"));
-    indexDiv?.classList.remove("show");
+  function showSingleHymn(query) {
+    const section = activeSection();
+    if (!section) return;
+    clearVisibleContent(section);
+    document.body.classList.remove('show-all-mode');
 
     query = query.toLowerCase().trim();
-    if (query === "") return;
+    if (!query) return;
 
-    if (query === "all") {
-      hymns.forEach(hymn => hymn.classList.add("show"));
-      return;
-    }
-
-    if (query === "index") {
-      if (!indexDiv) return;
-      indexDiv.innerHTML = "";
-      const titles = activeSection.querySelectorAll(".hymn h3");
-      titles.forEach(hymn => {
-        const link = document.createElement("a");
-        link.textContent = hymn.textContent;
-        link.href = "#" + hymn.parentElement.id;
-        indexDiv.appendChild(link);
-      });
-      indexDiv.classList.add("show");
-      return;
-    }
-
-    hymns.forEach(hymn => {
-      const num = hymn.querySelector("h3")?.textContent.split(" ")[0];
-      if (num && num.toLowerCase() === query) hymn.classList.add("show");
+    section.querySelectorAll('.hymn').forEach(hymn => {
+      const num = hymn.querySelector('h3')?.textContent.split(' ')[0];
+      if (num && num.toLowerCase() === query) hymn.classList.add('show');
     });
   }
 
-  searchInput.addEventListener("input", (e) => {
-    setUtilityState(false, false);
+  function showIndex() {
+    const section = activeSection();
+    if (!section) return;
+    clearVisibleContent(section);
     document.body.classList.remove('show-all-mode');
-    performSearch(e.target.value);
+
+    const indexDiv = section.querySelector('.index');
+    if (!indexDiv) return;
+
+    if (indexDiv.dataset.generated !== 'true') {
+      const fragment = document.createDocumentFragment();
+      section.querySelectorAll('.hymn h3').forEach(title => {
+        const link = document.createElement('a');
+        link.textContent = title.textContent;
+        link.href = '#' + title.parentElement.id;
+        fragment.appendChild(link);
+      });
+      indexDiv.replaceChildren(fragment);
+      indexDiv.dataset.generated = 'true';
+    }
+
+    indexDiv.classList.add('show');
+  }
+
+  searchInput.addEventListener('input', e => {
+    setUtilityState(false, false);
+    showSingleHymn(e.target.value);
   });
 
-  indexBtn.addEventListener("click", () => {
-    const activeSection = document.querySelector('.section:not(.hidden)');
+  indexBtn.addEventListener('click', () => {
     const wasActive = indexBtn.classList.contains('active');
+    setUtilityState(false, false);
     document.body.classList.remove('show-all-mode');
+
+    const section = activeSection();
     if (wasActive) {
-      clearVisibleContent(activeSection);
-      setUtilityState(false, false);
+      clearVisibleContent(section);
       return;
     }
-    performSearch("index");
+
+    showIndex();
     setUtilityState(true, false);
   });
 
-  showAllBtn.addEventListener("click", () => {
-    const activeSection = document.querySelector('.section:not(.hidden)');
+  showAllBtn.addEventListener('click', () => {
     const wasActive = showAllBtn.classList.contains('active');
+    setUtilityState(false, false);
+
+    const section = activeSection();
+    clearVisibleContent(section);
+
     if (wasActive) {
-      clearVisibleContent(activeSection);
       document.body.classList.remove('show-all-mode');
-      setUtilityState(false, false);
       return;
     }
-    performSearch("all");
+
     document.body.classList.add('show-all-mode');
     setUtilityState(false, true);
   });
