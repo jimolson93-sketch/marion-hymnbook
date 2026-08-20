@@ -1,0 +1,128 @@
+.mobile-book-picker,
+.mobile-scroll-fade{
+  display:none;
+}
+
+@media (max-width:700px){
+  .nav{
+    display:none !important;
+  }
+
+  .mobile-book-picker{
+    display:block;
+    width:100%;
+    max-width:560px;
+  }
+
+  .mobile-book-picker-toggle{
+    width:100%;
+    min-height:44px;
+    padding:10px 14px;
+    border:1px solid #8d958a;
+    border-radius:8px;
+    background:#fff;
+    color:#525a50;
+    font:inherit;
+    font-size:15px;
+    font-weight:650;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  .mobile-book-picker-toggle::after{
+    content:'▾';
+    float:right;
+    color:#747d72;
+    transition:transform .18s ease;
+  }
+
+  .mobile-book-picker.open .mobile-book-picker-toggle::after{
+    transform:rotate(180deg);
+  }
+
+  .mobile-book-picker.has-selection .mobile-book-picker-toggle{
+    border-color:#747d72;
+    color:#424941;
+  }
+
+  .mobile-book-picker-drawer{
+    max-height:0;
+    margin-top:0;
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(-4px);
+    transition:max-height .22s ease, opacity .16s ease, transform .22s ease, margin .22s ease;
+  }
+
+  .mobile-book-picker.open .mobile-book-picker-drawer{
+    max-height:180px;
+    margin-top:6px;
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .mobile-book-picker-option{
+    display:block;
+    width:100%;
+    min-height:42px;
+    margin:0;
+    padding:9px 14px;
+    border:0;
+    border-bottom:1px solid #e2e4df;
+    background:#fafaf8;
+    color:#525a50;
+    font:inherit;
+    font-size:15px;
+    font-weight:600;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  .mobile-book-picker-option:first-child{
+    border-radius:8px 8px 0 0;
+  }
+
+  .mobile-book-picker-option:last-child{
+    border-bottom:0;
+    border-radius:0 0 8px 8px;
+  }
+
+  .mobile-book-picker-option.active{
+    background:#747d72;
+    color:#fff;
+  }
+
+  .mobile-scroll-fade{
+    display:block;
+    position:fixed;
+    left:0;
+    right:0;
+    height:14px;
+    z-index:35;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .12s ease;
+  }
+
+  .mobile-scroll-fade.visible{
+    opacity:1;
+  }
+
+  .mobile-scroll-fade.top{
+    top:0;
+    background:linear-gradient(to bottom, rgba(246,245,241,.78), rgba(246,245,241,0));
+  }
+
+  .mobile-scroll-fade.bottom{
+    bottom:0;
+    background:linear-gradient(to top, rgba(246,245,241,.78), rgba(246,245,241,0));
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .mobile-book-picker-drawer,
+  .mobile-book-picker-toggle::after,
+  .mobile-scroll-fade{
+    transition:none !important;
+  }
+}
