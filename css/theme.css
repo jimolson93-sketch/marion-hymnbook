@@ -15,6 +15,17 @@ body{
   overscroll-behavior-y:contain;
 }
 
+/* Chrome/Windows scroll anchoring was treating the visible hymn as an anchor
+   when the in-flow Aa drawer changed the header height. The browser then
+   adjusted scrollY to compensate, making a plain Aa click look like a scroll.
+   Disable that browser correction on desktop; the app itself owns all intended
+   scrolling. */
+@media (min-width:701px){
+  html{
+    overflow-anchor:none;
+  }
+}
+
 ::selection{
   background:rgba(116,125,114,.30);
   color:var(--text);
