@@ -1,0 +1,17 @@
+/* Standalone hymn reading space: provide only enough height for a short hymn
+   to scroll its title to the top of the viewport. Long hymns use their natural height. */
+body:not(.show-all-mode) .section:not(.hidden) .hymn.show{
+  padding-bottom:18px !important;
+  min-height:calc(100dvh - 8px);
+}
+
+@supports not (height:100dvh){
+  body:not(.show-all-mode) .section:not(.hidden) .hymn.show{
+    min-height:calc(100vh - 8px);
+  }
+}
+
+/* All Hymns remains compact; never inherit standalone reading height. */
+body.show-all-mode .section:not(.hidden) .hymn{
+  min-height:0 !important;
+}
