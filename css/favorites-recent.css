@@ -67,6 +67,24 @@
   min-width:0;
 }
 
+/* Favorites use spacing and book headings rather than row divider lines. */
+.index[data-index-mode="favorites"] .saved-index-book-heading{
+  margin:22px 14px 7px;
+}
+
+.index[data-index-mode="favorites"] .saved-index-book-heading:first-child{
+  margin-top:10px;
+}
+
+.index[data-index-mode="favorites"] a.saved-index-entry{
+  border-bottom:0 !important;
+  position:relative;
+}
+
+.index[data-index-mode="favorites"] a.saved-index-entry + a.saved-index-entry{
+  margin-top:2px;
+}
+
 .saved-index-book-heading{
   margin:12px 8px 5px;
   color:var(--muted);
@@ -91,6 +109,24 @@
   font-size:11px;
   font-weight:700;
   white-space:nowrap;
+}
+
+/* A miniature version of the hymn-page marker identifies saved hymns in All Hymns. */
+.index a.book-index-entry.is-favorite-index{
+  position:relative;
+}
+
+.index a.book-index-entry.is-favorite-index::before{
+  content:"";
+  position:absolute;
+  left:3px;
+  top:22%;
+  bottom:22%;
+  width:3px;
+  border-radius:999px;
+  background:var(--accent);
+  opacity:.92;
+  pointer-events:none;
 }
 
 .saved-index-empty{
@@ -119,6 +155,10 @@
     height:58px;
     top:8px;
     left:-2px;
+  }
+
+  .index a.book-index-entry.is-favorite-index::before{
+    width:4px;
   }
 }
 
