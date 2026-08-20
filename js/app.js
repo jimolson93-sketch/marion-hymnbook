@@ -61,11 +61,6 @@ document.addEventListener("mgh:data-ready", () => {
         const link = document.createElement("a");
         link.textContent = hymn.textContent;
         link.href = "#" + hymn.parentElement.id;
-        link.addEventListener("click", e => {
-          e.preventDefault();
-          const target = document.getElementById(hymn.parentElement.id);
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
         indexDiv.appendChild(link);
       });
       indexDiv.classList.add("show");
@@ -152,7 +147,6 @@ document.addEventListener("mgh:data-ready", () => {
     applyZoom(Number(slider.value) + STEP);
   });
 
-  
   let startingValue = 100;
   const isMobile = window.matchMedia("(max-width:700px)").matches;
   try {
@@ -187,7 +181,6 @@ document.addEventListener("mgh:data-ready", () => {
   });
 
   applyZoom(startingValue);
-
 })();
 
 (function(){
@@ -218,50 +211,6 @@ document.addEventListener("mgh:data-ready", () => {
       window.scrollTo({ top: y, behavior: "smooth" });
     }, 50);
   }, true);
-})();
-
-(function(){
-  document.addEventListener("click", function(e){
-    const link = e.target.closest(".index a");
-    if (!link) return;
-
-    e.preventDefault();
-
-    const href = link.getAttribute("href") || "";
-    if (!href.startsWith("#")) return;
-
-    const target = document.querySelector(href);
-    if (!target) return;
-
-    // Hide all indexes and return to hymn view.
-    document.querySelectorAll(".index").forEach(idx => {
-      idx.classList.remove("show");
-      idx.setAttribute("aria-hidden", "true");
-    });
-
-    // Hide all hymns, then show only the selected one.
-    document.querySelectorAll(".hymn").forEach(h => h.classList.remove("show"));
-    target.classList.add("show");
-
-    // Make sure the correct hymn-book section is visible/active.
-    const section = target.closest(".section");
-    if (section) {
-      document.querySelectorAll(".section").forEach(s => {
-        s.classList.toggle("hidden", s !== section);
-      });
-
-      document.querySelectorAll(".nav button").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.target === section.id);
-      });
-    }
-
-    // Scroll selected hymn title into view.
-    setTimeout(() => {
-      const title = target.querySelector("h3") || target;
-      const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }, 30);
-  });
 })();
 
 (function(){
