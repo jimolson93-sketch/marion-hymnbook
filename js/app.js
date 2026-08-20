@@ -194,11 +194,13 @@ document.addEventListener("mgh:data-ready", () => {
   const btn = document.getElementById('settingsBtn');
   const drawer = document.getElementById('settingsDrawer');
   if (!btn || !drawer) return;
+  let openedAt = 0;
   function setOpen(open){
     drawer.classList.toggle('open', open);
     btn.classList.toggle('active', open);
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (open) openedAt = performance.now();
   }
   function close(){ if (drawer.classList.contains('open')) setOpen(false); }
   setOpen(false);
@@ -210,5 +212,9 @@ document.addEventListener("mgh:data-ready", () => {
     if (drawer.contains(e.target) || btn.contains(e.target)) return;
     close();
   });
-  window.addEventListener('scroll', close, { passive:true });
+  window.addEventListener('scroll', function(){
+    if (!drawer.classList.contains('open')) return;
+    if (performance.now() - openedAt < 400) return;
+    close();
+  }, { passive:true });
 })();
