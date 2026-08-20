@@ -2,9 +2,9 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  margin:0 0 0 8px;
-  padding-left:8px;
-  border-left:1px solid rgba(116,125,114,.18);
+  margin:0 0 0 6px;
+  padding-left:0;
+  border-left:0;
 }
 
 .appearance-controls{
@@ -56,75 +56,16 @@
   backdrop-filter:blur(14px) saturate(.75);
 }
 
-.share-qr-modal[hidden]{
-  display:none;
-}
-
-.share-qr-card{
-  position:relative;
-  width:min(86vw,360px);
-  padding:24px 24px 22px;
-  border-radius:18px;
-  background:#fff;
-  color:#161816;
-  box-shadow:0 18px 60px rgba(0,0,0,.24);
-  text-align:center;
-}
-
-.share-qr-close{
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:34px;
-  height:34px;
-  border:0;
-  border-radius:50%;
-  background:#f1f3f0;
-  color:#464b46;
-  font:inherit;
-  font-size:22px;
-  line-height:1;
-  cursor:pointer;
-}
-
-.share-qr-title{
-  margin:4px 34px 6px;
-  font-size:18px;
-  font-weight:800;
-}
-
-.share-qr-subtitle{
-  margin:0 0 16px;
-  color:#687068;
-  font-size:13px;
-}
-
-.share-qr-image-wrap{
-  display:inline-flex;
-  padding:16px;
-  border-radius:12px;
-  background:#fff;
-}
-
-.share-qr-image{
-  display:block;
-  width:min(68vw,280px);
-  height:auto;
-  image-rendering:pixelated;
-}
-
-body.share-qr-open{
-  overflow:hidden;
-}
+.share-qr-modal[hidden]{display:none;}
+.share-qr-card{position:relative;width:min(86vw,360px);padding:24px 24px 22px;border-radius:18px;background:#fff;color:#161816;box-shadow:0 18px 60px rgba(0,0,0,.24);text-align:center;}
+.share-qr-close{position:absolute;top:10px;right:10px;width:34px;height:34px;border:0;border-radius:50%;background:#f1f3f0;color:#464b46;font:inherit;font-size:22px;line-height:1;cursor:pointer;}
+.share-qr-title{margin:4px 34px 6px;font-size:18px;font-weight:800;}
+.share-qr-subtitle{margin:0 0 16px;color:#687068;font-size:13px;}
+.share-qr-image-wrap{display:inline-flex;padding:16px;border-radius:12px;background:#fff;}
+.share-qr-image{display:block;width:min(68vw,280px);height:auto;image-rendering:pixelated;}
+body.share-qr-open{overflow:hidden;}
 
 @media (max-width:520px){
-  .share-row{
-    margin-left:5px;
-    padding-left:5px;
-  }
-
-  .share-qr-trigger{
-    width:34px;
-    height:34px;
-  }
+  .share-row{margin-left:4px;}
+  .share-qr-trigger{width:34px;height:34px;}
 }
