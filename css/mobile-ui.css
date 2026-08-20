@@ -14,6 +14,7 @@
     align-self:center;
     width:auto;
     max-width:calc(100vw - 40px);
+    margin:-5px 0 -7px;
     z-index:45;
   }
 
@@ -25,13 +26,13 @@
     width:auto;
     min-height:40px;
     margin:0 auto;
-    padding:7px 10px;
+    padding:6px 10px;
     border:1px solid transparent;
     border-radius:10px;
     background:transparent;
     color:#596057;
     font:inherit;
-    font-size:15px;
+    font-size:17px;
     font-weight:600;
     line-height:1.15;
     cursor:pointer;
@@ -46,6 +47,10 @@
     transition:transform .18s ease;
   }
 
+  .mobile-book-picker.open{
+    margin:0;
+  }
+
   .mobile-book-picker.open .mobile-book-picker-toggle{
     position:relative;
     z-index:2;
@@ -58,6 +63,7 @@
     border-radius:11px 11px 0 0;
     background:#fff;
     box-shadow:0 7px 20px rgba(47,51,47,.10);
+    font-size:15px;
   }
 
   .mobile-book-picker.open .mobile-book-picker-toggle::after{
