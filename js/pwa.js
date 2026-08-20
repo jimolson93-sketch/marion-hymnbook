@@ -112,49 +112,76 @@
     }
   } catch (e) {}
 
-  async function checkDeployment(registration) {
-    try {
-      const response = await fetch('version.json?check=' + Date.now(), { cache: 'no-store' });
-      if (!response.ok) return;
+  async function fetchDeployedVersion() {
+    const response = await fetch('version.json?check=' + Date.now(), {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data?.version || null;
+  }
 
-      const deployed = (await response.json()).version;
-      if (!deployed) return;
+  async function refreshVersionCache(registration, deployed) {
+    const worker = registration.waiting || registration.active || navigator.serviceWorker.controller;
+    if (!worker) return false;
+
+    const channel = new MessageChannel();
+    const completed = new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('update timeout')), 10000);
+      channel.port1.onmessage = event => {
+        clearTimeout(timer);
+        event.data && event.data.ok ? resolve(true) : reject(new Error('update failed'));
+      };
+    });
+
+    worker.postMessage({ type: 'REFRESH_CACHE', version: deployed }, [channel.port2]);
+    return completed;
+  }
+
+  async function checkDeployment(registration, forceReload = false) {
+    try {
+      const deployed = await fetchDeployedVersion();
+      if (!deployed) return false;
 
       const known = localStorage.getItem(VERSION_KEY);
       if (!known) {
         localStorage.setItem(VERSION_KEY, deployed);
-        return;
+        return false;
       }
-      if (known === deployed) return;
+      if (known === deployed) return false;
 
-      const worker = registration.waiting || registration.active || navigator.serviceWorker.controller;
-      if (!worker) return;
-
-      const channel = new MessageChannel();
-      const completed = new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error('update timeout')), 10000);
-        channel.port1.onmessage = event => {
-          clearTimeout(timer);
-          event.data && event.data.ok ? resolve() : reject(new Error('update failed'));
-        };
-      });
-
-      worker.postMessage({ type: 'REFRESH_CACHE', version: deployed }, [channel.port2]);
-      await completed;
+      await refreshVersionCache(registration, deployed);
       localStorage.setItem(VERSION_KEY, deployed);
-      reloadOnce();
+
+      if (forceReload) {
+        // Returning to the app should pick up the new build immediately instead
+        // of waiting for iOS to cycle the service worker on its own.
+        window.location.replace(window.location.href.split('#')[0]);
+      } else {
+        reloadOnce();
+      }
+      return true;
     } catch (e) {
       // Offline or failed checks leave the currently working cache untouched.
+      return false;
     }
   }
 
-  async function runUpdateCheck(registration) {
+  async function runUpdateCheck(registration, forceReload = false) {
     if (checking || document.visibilityState === 'hidden' || !navigator.onLine) return;
     checking = true;
     try {
+      // Read version.json first on foreground checks so a changed deployment
+      // can be acted on even if iOS delays the service-worker update lifecycle.
+      if (forceReload) {
+        const changed = await checkDeployment(registration, true);
+        if (changed) return;
+      }
+
       await registration.update();
       if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      await checkDeployment(registration);
+      if (!forceReload) await checkDeployment(registration, false);
     } catch (e) {
       // Keep the current version if the update check fails.
     } finally {
@@ -187,17 +214,17 @@
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' });
-      await runUpdateCheck(registration);
+      await runUpdateCheck(registration, true);
 
-      setInterval(() => runUpdateCheck(registration), CHECK_INTERVAL);
+      setInterval(() => runUpdateCheck(registration, false), CHECK_INTERVAL);
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') runUpdateCheck(registration);
+        if (document.visibilityState === 'visible') runUpdateCheck(registration, true);
       });
-      window.addEventListener('focus', () => runUpdateCheck(registration));
-      window.addEventListener('pageshow', () => runUpdateCheck(registration));
+      window.addEventListener('focus', () => runUpdateCheck(registration, true));
+      window.addEventListener('pageshow', () => runUpdateCheck(registration, true));
       window.addEventListener('online', () => {
         showOfflineStatus();
-        runUpdateCheck(registration);
+        runUpdateCheck(registration, true);
       });
       window.addEventListener('offline', showOfflineStatus);
 
