@@ -1,0 +1,29 @@
+.index a.index-entry{
+  display:grid;
+  grid-template-columns:3ch minmax(0,1fr);
+  column-gap:14px;
+  align-items:baseline;
+}
+
+.index-number{
+  text-align:right;
+  font-weight:700;
+  color:#454c43;
+  font-variant-numeric:tabular-nums;
+}
+
+.index-title{
+  min-width:0;
+}
+
+@media (max-width:600px){
+  .index a.index-entry{
+    overflow:hidden;
+  }
+
+  .index-title{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:clip;
+  }
+}
