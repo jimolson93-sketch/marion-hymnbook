@@ -1,10 +1,11 @@
 (() => {
   const DISMISS_KEY = 'mghInstallPromptDismissed';
-  const UPDATE_CHECK_THROTTLE_MS = 15000;
+  const VERSION_KEY = 'mgh-deployed-version';
+  const RELOAD_KEY = 'mgh-update-reload';
+  const CHECK_INTERVAL = 60000;
   let deferredInstallPrompt = null;
-  let refreshing = false;
-  let activeRegistration = null;
-  let lastUpdateCheck = 0;
+  let hadController = !!navigator.serviceWorker?.controller;
+  let checking = false;
 
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -97,34 +98,69 @@
     }
   }
 
-  async function checkForUpdate(force = false) {
-    if (!activeRegistration || !navigator.onLine || refreshing) return;
-
-    const now = Date.now();
-    if (!force && now - lastUpdateCheck < UPDATE_CHECK_THROTTLE_MS) return;
-    lastUpdateCheck = now;
-
+  function reloadOnce() {
     try {
-      await activeRegistration.update();
-      if (activeRegistration.waiting && navigator.serviceWorker.controller) {
-        showUpdateNotice(activeRegistration);
+      if (sessionStorage.getItem(RELOAD_KEY)) return;
+      sessionStorage.setItem(RELOAD_KEY, '1');
+    } catch (e) {}
+    window.location.reload();
+  }
+
+  try {
+    if (sessionStorage.getItem(RELOAD_KEY)) {
+      setTimeout(() => sessionStorage.removeItem(RELOAD_KEY), 5000);
+    }
+  } catch (e) {}
+
+  async function checkDeployment(registration) {
+    try {
+      const response = await fetch('version.json?check=' + Date.now(), { cache: 'no-store' });
+      if (!response.ok) return;
+
+      const deployed = (await response.json()).version;
+      if (!deployed) return;
+
+      const known = localStorage.getItem(VERSION_KEY);
+      if (!known) {
+        localStorage.setItem(VERSION_KEY, deployed);
+        return;
       }
-    } catch (error) {
-      console.debug('Update check skipped:', error);
+      if (known === deployed) return;
+
+      const worker = registration.waiting || registration.active || navigator.serviceWorker.controller;
+      if (!worker) return;
+
+      const channel = new MessageChannel();
+      const completed = new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('update timeout')), 10000);
+        channel.port1.onmessage = event => {
+          clearTimeout(timer);
+          event.data && event.data.ok ? resolve() : reject(new Error('update failed'));
+        };
+      });
+
+      worker.postMessage({ type: 'REFRESH_CACHE', version: deployed }, [channel.port2]);
+      await completed;
+      localStorage.setItem(VERSION_KEY, deployed);
+      reloadOnce();
+    } catch (e) {
+      // Offline or failed checks leave the currently working cache untouched.
     }
   }
 
-  window.addEventListener('online', () => {
-    showOfflineStatus();
-    checkForUpdate(true);
-  });
-  window.addEventListener('offline', showOfflineStatus);
-
-  window.addEventListener('focus', () => checkForUpdate());
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') checkForUpdate();
-  });
-  window.addEventListener('pageshow', () => checkForUpdate());
+  async function runUpdateCheck(registration) {
+    if (checking || document.visibilityState === 'hidden' || !navigator.onLine) return;
+    checking = true;
+    try {
+      await registration.update();
+      if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      await checkDeployment(registration);
+    } catch (e) {
+      // Keep the current version if the update check fails.
+    } finally {
+      checking = false;
+    }
+  }
 
   window.addEventListener('beforeinstallprompt', event => {
     event.preventDefault();
@@ -143,31 +179,29 @@
     return;
   }
 
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController) reloadOnce();
+    hadController = true;
+  });
+
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('./service-worker.js');
-      activeRegistration = registration;
+      const registration = await navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' });
+      await runUpdateCheck(registration);
 
-      if (registration.waiting && navigator.serviceWorker.controller) {
-        showUpdateNotice(registration);
-      }
-
-      registration.addEventListener('updatefound', () => {
-        const worker = registration.installing;
-        if (!worker) return;
-        worker.addEventListener('statechange', () => {
-          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateNotice(registration);
-          }
-        });
+      setInterval(() => runUpdateCheck(registration), CHECK_INTERVAL);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') runUpdateCheck(registration);
       });
+      window.addEventListener('focus', () => runUpdateCheck(registration));
+      window.addEventListener('pageshow', () => runUpdateCheck(registration));
+      window.addEventListener('online', () => {
+        showOfflineStatus();
+        runUpdateCheck(registration);
+      });
+      window.addEventListener('offline', showOfflineStatus);
 
-      // Do a fresh check whenever the app launches instead of waiting for the
-      // browser's normal service-worker update interval.
-      setTimeout(() => checkForUpdate(true), 350);
-
-      navigator.serviceWorker.ready.then(readyRegistration => {
-        activeRegistration = readyRegistration;
+      navigator.serviceWorker.ready.then(() => {
         showOfflineStatus();
         setTimeout(showInstallNotice, 900);
       });
@@ -176,40 +210,4 @@
       setTimeout(showInstallNotice, 900);
     }
   });
-
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
-
-  async function refreshToLatest(registration) {
-    if (refreshing) return;
-    refreshing = true;
-
-    const notice = document.getElementById('pwa-update-notice');
-    if (notice) {
-      notice.querySelectorAll('button').forEach(button => { button.disabled = true; });
-      const text = notice.querySelector('.pwa-notice-text');
-      if (text) text.textContent = 'Updating Hymn Book…';
-    }
-
-    try {
-      await registration.unregister();
-    } catch (error) {
-      console.warn('Could not reset service worker registration:', error);
-    }
-
-    window.location.reload();
-  }
-
-  function showUpdateNotice(registration) {
-    createNotice('pwa-update-notice', 'Hymn Book update available. Tap Refresh to get the latest version.', [
-      {
-        label: 'Refresh',
-        onClick: () => refreshToLatest(registration)
-      },
-      { label: 'Later', secondary: true, onClick: () => hideNotice('pwa-update-notice') }
-    ]);
-  }
 })();
