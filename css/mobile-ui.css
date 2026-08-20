@@ -10,29 +10,34 @@
 
   .mobile-book-picker{
     display:block;
-    width:100%;
-    max-width:560px;
+    width:230px;
+    max-width:calc(100vw - 40px);
+    margin:0 auto;
   }
 
   .mobile-book-picker-toggle{
+    display:flex;
+    align-items:center;
+    justify-content:center;
     width:100%;
-    min-height:44px;
-    padding:10px 14px;
-    border:1px solid #8d958a;
+    min-height:40px;
+    padding:7px 12px;
+    border:1px solid #c9cec6;
     border-radius:8px;
-    background:#fff;
+    background:rgba(255,255,255,.72);
     color:#525a50;
     font:inherit;
     font-size:15px;
-    font-weight:650;
-    text-align:left;
+    font-weight:600;
+    text-align:center;
     cursor:pointer;
   }
 
   .mobile-book-picker-toggle::after{
     content:'▾';
-    float:right;
+    margin-left:8px;
     color:#747d72;
+    font-size:11px;
     transition:transform .18s ease;
   }
 
@@ -41,22 +46,25 @@
   }
 
   .mobile-book-picker.has-selection .mobile-book-picker-toggle{
-    border-color:#747d72;
+    border-color:#b5bbb2;
     color:#424941;
   }
 
   .mobile-book-picker-drawer{
+    width:100%;
     max-height:0;
     margin-top:0;
     overflow:hidden;
     opacity:0;
     transform:translateY(-4px);
+    border-radius:8px;
+    box-shadow:0 6px 16px rgba(0,0,0,.06);
     transition:max-height .22s ease, opacity .16s ease, transform .22s ease, margin .22s ease;
   }
 
   .mobile-book-picker.open .mobile-book-picker-drawer{
-    max-height:180px;
-    margin-top:6px;
+    max-height:150px;
+    margin-top:5px;
     opacity:1;
     transform:translateY(0);
   }
@@ -64,27 +72,22 @@
   .mobile-book-picker-option{
     display:block;
     width:100%;
-    min-height:42px;
+    min-height:40px;
     margin:0;
-    padding:9px 14px;
+    padding:8px 12px;
     border:0;
-    border-bottom:1px solid #e2e4df;
+    border-bottom:1px solid #e5e7e2;
     background:#fafaf8;
     color:#525a50;
     font:inherit;
-    font-size:15px;
-    font-weight:600;
-    text-align:left;
+    font-size:14px;
+    font-weight:550;
+    text-align:center;
     cursor:pointer;
-  }
-
-  .mobile-book-picker-option:first-child{
-    border-radius:8px 8px 0 0;
   }
 
   .mobile-book-picker-option:last-child{
     border-bottom:0;
-    border-radius:0 0 8px 8px;
   }
 
   .mobile-book-picker-option.active{
