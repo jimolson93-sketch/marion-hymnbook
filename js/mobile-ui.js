@@ -29,10 +29,8 @@
 
     function syncSelection(sourceButton) {
       if (!sourceButton) return;
-      const selectedIndex = Math.max(0, sourceButtons.indexOf(sourceButton));
       toggle.textContent = sourceButton.textContent.trim();
       picker.classList.add('has-selection');
-      picker.style.setProperty('--selected-index', selectedIndex);
       drawer.querySelectorAll('.mobile-book-picker-option').forEach(option => {
         const active = option.dataset.target === sourceButton.dataset.target;
         option.classList.toggle('active', active);
