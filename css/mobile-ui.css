@@ -90,9 +90,11 @@
     pointer-events:auto;
   }
 
+  /* The selected book is already shown inside the open menu. Hide the
+     closed-state label while the menu is open so it does not appear twice. */
   .mobile-book-picker.open .mobile-book-picker-toggle{
-    background:transparent;
-    box-shadow:none;
+    opacity:0;
+    pointer-events:none;
   }
 
   .mobile-book-picker-option{
