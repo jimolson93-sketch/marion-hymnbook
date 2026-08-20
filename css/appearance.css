@@ -1,12 +1,13 @@
 .appearance-controls{
   width:100%;
-  margin-top:12px;
-  padding-top:12px;
+  margin-top:10px;
+  padding-top:10px;
+  padding-bottom:3px;
   border-top:1px solid rgba(154,159,152,.20);
 }
 
 .appearance-label{
-  margin-bottom:8px;
+  margin-bottom:7px;
   text-align:center;
   color:#5f675f;
   font-size:12px;
@@ -17,11 +18,14 @@
   display:flex;
   width:100%;
   gap:6px;
+  padding:0 1px;
 }
 
 .appearance-option{
   flex:1 1 0;
-  min-height:36px;
+  min-height:32px;
+  height:32px;
+  padding:0 8px;
   border:1px solid #d3d6d0;
   border-radius:7px;
   background:#fff;
@@ -29,6 +33,7 @@
   font:inherit;
   font-size:12px;
   font-weight:600;
+  line-height:1;
   cursor:pointer;
 }
 
@@ -36,6 +41,13 @@
   border-color:#747d72;
   background:#747d72;
   color:#fff;
+}
+
+/* Appearance adds a second settings row, so the drawer must be allowed to
+   grow instead of clipping it at the older font-size-only height. */
+.settings-drawer.open{
+  max-height:300px;
+  overflow:visible;
 }
 
 html[data-theme="dark"]{
