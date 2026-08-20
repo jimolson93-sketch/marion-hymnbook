@@ -1,7 +1,20 @@
 .share-row{
   display:flex;
-  justify-content:flex-end;
-  margin-top:10px;
+  align-items:center;
+  justify-content:center;
+  margin:0 0 0 8px;
+  padding-left:8px;
+  border-left:1px solid rgba(116,125,114,.18);
+}
+
+.appearance-controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.appearance-options{
+  flex:0 1 auto;
 }
 
 .share-qr-trigger{
@@ -102,4 +115,16 @@
 
 body.share-qr-open{
   overflow:hidden;
+}
+
+@media (max-width:520px){
+  .share-row{
+    margin-left:5px;
+    padding-left:5px;
+  }
+
+  .share-qr-trigger{
+    width:34px;
+    height:34px;
+  }
 }
