@@ -4,17 +4,9 @@
 }
 
 @media (max-width:700px){
-  header{
-    gap:6px !important;
-  }
-
-  .controls{
-    gap:8px !important;
-  }
-
-  .nav{
-    display:none !important;
-  }
+  header{gap:6px !important;}
+  .controls{gap:8px !important;}
+  .nav{display:none !important;}
 
   .mobile-book-picker{
     display:block;
@@ -32,53 +24,62 @@
     justify-content:center;
     gap:7px;
     width:auto;
-    min-height:40px;
+    min-height:38px;
     margin:0 auto;
-    padding:6px 10px;
-    border:1px solid transparent;
-    border-radius:10px;
-    background:transparent;
+    padding:7px 13px;
+    border:1px solid #d6dad3;
+    border-radius:999px;
+    background:rgba(255,255,255,.82);
     color:#596057;
+    box-shadow:0 1px 3px rgba(47,51,47,.06);
     font:inherit;
-    font-size:17px;
+    font-size:16px;
     font-weight:600;
     line-height:1.15;
     cursor:pointer;
-    transition:opacity .12s ease;
+    transition:background .14s ease, transform .14s ease, box-shadow .14s ease;
   }
 
   .mobile-book-picker-toggle::after{
-    content:'▾';
+    content:'⌄';
     color:#747d72;
-    font-size:10px;
+    font-size:13px;
+    line-height:1;
+    margin-top:-3px;
   }
 
-  .mobile-book-picker.open{
-    margin:-7px 0 -9px;
-  }
+  .mobile-book-picker-toggle:active{transform:scale(.98);}
 
-  .mobile-book-picker.open .mobile-book-picker-toggle{
+  .mobile-book-picker-drawer{
+    display:block;
+    visibility:hidden;
     opacity:0;
+    position:absolute;
+    top:calc(100% + 7px);
+    left:50%;
+    width:245px;
+    max-width:calc(100vw - 40px);
+    transform:translateX(-50%) translateY(-5px) scale(.98);
+    transform-origin:top center;
+    overflow:hidden;
+    border:1px solid #d9ddd6;
+    border-radius:15px;
+    background:rgba(255,255,255,.97);
+    box-shadow:0 14px 34px rgba(47,51,47,.16),0 2px 8px rgba(47,51,47,.08);
+    transition:opacity .14s ease, transform .14s ease, visibility .14s;
     pointer-events:none;
   }
 
-  .mobile-book-picker-drawer{
-    display:none;
-    position:absolute;
-    top:0;
-    left:50%;
-    width:230px;
-    max-width:calc(100vw - 40px);
-    transform:translateX(-50%);
-    overflow:hidden;
-    border:1px solid #d9ddd6;
-    border-radius:11px;
-    background:#fff;
-    box-shadow:0 12px 24px rgba(47,51,47,.12);
+  .mobile-book-picker.open .mobile-book-picker-drawer{
+    visibility:visible;
+    opacity:1;
+    transform:translateX(-50%) translateY(0) scale(1);
+    pointer-events:auto;
   }
 
-  .mobile-book-picker.open .mobile-book-picker-drawer{
-    display:block;
+  .mobile-book-picker.open .mobile-book-picker-toggle{
+    background:#f4f5f2;
+    box-shadow:0 1px 4px rgba(47,51,47,.10);
   }
 
   .mobile-book-picker-option{
@@ -87,40 +88,30 @@
     align-items:center;
     justify-content:space-between;
     width:100%;
-    min-height:40px;
-    height:40px;
+    min-height:50px;
     margin:0;
-    padding:8px 14px;
+    padding:10px 16px;
     border:0;
-    border-top:1px solid #eceee9;
-    background:#fff;
+    border-top:1px solid #e7eae4;
+    background:transparent;
     color:#596057;
     font:inherit;
-    font-size:14px;
+    font-size:16px;
     font-weight:500;
     text-align:left;
     cursor:pointer;
   }
 
-  .mobile-book-picker-option:first-child{
-    border-top:0;
-  }
-
-  .mobile-book-picker-option.active{
-    font-weight:600;
-    color:#4f574d;
-  }
-
+  .mobile-book-picker-option:first-child{border-top:0;}
+  .mobile-book-picker-option.active{font-weight:650;color:#424941;}
   .mobile-book-picker-option.active::after{
     content:'✓';
     color:#747d72;
-    font-size:13px;
+    font-size:17px;
     font-weight:700;
+    margin-left:18px;
   }
-
-  .mobile-book-picker-option:active{
-    background:#f1f3ef;
-  }
+  .mobile-book-picker-option:active{background:#eef1eb;}
 
   .section:not(:has(.index.show, .hymn.show, .data-loading)){
     padding:0 !important;
@@ -142,25 +133,13 @@
     pointer-events:none;
     transition:opacity .12s ease;
   }
-
-  .mobile-scroll-fade.visible{
-    opacity:1;
-  }
-
-  .mobile-scroll-fade.top{
-    top:0;
-    background:linear-gradient(to bottom, rgba(246,245,241,.78), rgba(246,245,241,0));
-  }
-
-  .mobile-scroll-fade.bottom{
-    bottom:0;
-    background:linear-gradient(to top, rgba(246,245,241,.78), rgba(246,245,241,0));
-  }
+  .mobile-scroll-fade.visible{opacity:1;}
+  .mobile-scroll-fade.top{top:0;background:linear-gradient(to bottom,rgba(246,245,241,.78),rgba(246,245,241,0));}
+  .mobile-scroll-fade.bottom{bottom:0;background:linear-gradient(to top,rgba(246,245,241,.78),rgba(246,245,241,0));}
 }
 
 @media (prefers-reduced-motion:reduce){
   .mobile-book-picker-toggle,
-  .mobile-scroll-fade{
-    transition:none !important;
-  }
+  .mobile-book-picker-drawer,
+  .mobile-scroll-fade{transition:none !important;}
 }
