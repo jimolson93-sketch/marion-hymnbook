@@ -1,0 +1,9 @@
+/* Keep verse numbers, including the period, on one line at every hymn zoom level. */
+.verse-number{
+  white-space:nowrap !important;
+  overflow-wrap:normal !important;
+  word-break:keep-all !important;
+  flex:0 0 1.6em !important;
+  width:1.6em !important;
+  min-width:1.6em !important;
+}
