@@ -194,17 +194,40 @@ document.addEventListener("mgh:data-ready", () => {
   const btn = document.getElementById('settingsBtn');
   const drawer = document.getElementById('settingsDrawer');
   if (!btn || !drawer) return;
-  let openedAt = 0;
-  function setOpen(open){
-    drawer.classList.toggle('open', open);
-    btn.classList.toggle('active', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
-    if (open) openedAt = performance.now();
+  let restoringScroll = false;
+
+  function preserveScroll(action){
+    const x = window.scrollX;
+    const y = window.scrollY;
+    action();
+    restoringScroll = true;
+    window.scrollTo(x, y);
+    requestAnimationFrame(() => {
+      window.scrollTo(x, y);
+      requestAnimationFrame(() => {
+        window.scrollTo(x, y);
+        restoringScroll = false;
+      });
+    });
   }
+
+  function setOpen(open, keepScroll = false){
+    const apply = () => {
+      drawer.classList.toggle('open', open);
+      btn.classList.toggle('active', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+    };
+    if (keepScroll) preserveScroll(apply); else apply();
+  }
+
   function close(){ if (drawer.classList.contains('open')) setOpen(false); }
   setOpen(false);
-  btn.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!drawer.classList.contains('open')); });
+  btn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(!drawer.classList.contains('open'), true);
+  });
   drawer.addEventListener('click', e => e.stopPropagation());
   drawer.addEventListener('pointerdown', e => e.stopPropagation());
   document.addEventListener('pointerdown', function(e){
@@ -213,8 +236,7 @@ document.addEventListener("mgh:data-ready", () => {
     close();
   });
   window.addEventListener('scroll', function(){
-    if (!drawer.classList.contains('open')) return;
-    if (performance.now() - openedAt < 400) return;
+    if (restoringScroll || !drawer.classList.contains('open')) return;
     close();
   }, { passive:true });
 })();
