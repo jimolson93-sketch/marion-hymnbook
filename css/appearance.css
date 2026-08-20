@@ -41,11 +41,13 @@
   color:#fff;
 }
 
-/* Keep the build number close to the appearance controls and readable,
-   without giving it the visual weight of a setting. */
+/* Keep the build number inside the settings block, just above its divider. */
 .app-version{
   margin-top:5px !important;
+  margin-bottom:5px !important;
   padding-top:5px !important;
+  padding-bottom:0 !important;
+  border-top:0 !important;
   color:rgba(91,98,89,.64) !important;
 }
 
