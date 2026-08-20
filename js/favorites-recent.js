@@ -124,13 +124,19 @@
     return Array.from(document.querySelectorAll('.section')).find(section => !section.classList.contains('hidden')) || null;
   }
 
+  function recordVisibleRecent() {
+    const section = activeSection();
+    if (!section || document.body.classList.contains('show-all-mode')) return;
+    const visible = Array.from(section.querySelectorAll('.hymn.show')).filter(hymn => getComputedStyle(hymn).display !== 'none');
+    if (visible.length === 1) recordRecent(visible[0]);
+  }
+
   function scheduleVisibleRecent() {
     clearTimeout(recentTimer);
     recentTimer = setTimeout(() => {
-      const section = activeSection();
-      if (!section || document.body.classList.contains('show-all-mode')) return;
-      const visible = Array.from(section.querySelectorAll('.hymn.show')).filter(hymn => getComputedStyle(hymn).display !== 'none');
-      if (visible.length === 1) recordRecent(visible[0]);
+      const search = document.getElementById('searchInput');
+      if (search && document.activeElement === search) return;
+      recordVisibleRecent();
     }, 60);
   }
 
@@ -340,6 +346,14 @@
       if (mutations.some(mutation => mutation.type === 'attributes' && mutation.attributeName === 'class' && mutation.target.classList?.contains('hymn'))) scheduleVisibleRecent();
     });
     document.querySelectorAll('.section').forEach(section => observer.observe(section, { subtree: true, attributes: true, attributeFilter: ['class'] }));
+
+    const search = document.getElementById('searchInput');
+    if (search) {
+      search.addEventListener('blur', () => setTimeout(recordVisibleRecent, 80));
+      search.addEventListener('keydown', event => {
+        if (event.key === 'Enter') setTimeout(recordVisibleRecent, 100);
+      }, true);
+    }
 
     document.addEventListener('click', event => {
       if (event.target.closest('#indexBtn')) setTimeout(setupVisibleIndex, 30);
