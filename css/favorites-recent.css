@@ -1,21 +1,25 @@
-.hymn h3{
+.hymn{
   position:relative;
+}
+
+.hymn h3{
   -webkit-user-select:none;
   user-select:none;
   -webkit-touch-callout:none;
 }
 
-/* Saved hymn marker: a quiet page-edge style rule beside the title. */
-.hymn.is-favorite h3::before{
+/* Saved hymn marker: a clear page-edge rule at the outer edge of the hymn UI. */
+.hymn.is-favorite::before{
   content:"";
   position:absolute;
   left:0;
-  top:12%;
-  bottom:12%;
-  width:3px;
+  top:7px;
+  width:4px;
+  height:46px;
   border-radius:999px;
   background:var(--accent);
-  opacity:.9;
+  opacity:.96;
+  pointer-events:none;
 }
 
 /* Interactive UI should behave like controls rather than selectable page text. */
@@ -110,8 +114,10 @@
 }
 
 @media (min-width:701px){
-  .hymn.is-favorite h3::before{
-    width:4px;
+  .hymn.is-favorite::before{
+    width:5px;
+    height:58px;
+    top:8px;
     left:-2px;
   }
 }
