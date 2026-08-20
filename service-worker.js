@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'mgh-hymnbook-';
-const CACHE_VERSION = '1.2.10';
+const CACHE_VERSION = '1.2.11';
 const APP_ASSETS = [
   './',
   './index.html',
@@ -25,6 +25,7 @@ const APP_ASSETS = [
   './js/index-format.js',
   './js/mobile-ui.js',
   './js/appearance.js',
+  './js/show-all-fix.js',
   './js/pwa.js',
   './data/new-believers.html',
   './data/gospel.html',
