@@ -1,5 +1,6 @@
 (() => {
   const input = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
   if (!input) return;
 
   const isMobile = window.matchMedia('(max-width:700px)').matches;
@@ -14,19 +15,28 @@
       .find(item => getComputedStyle(item).display !== 'none' && item.offsetParent !== null) || null;
   }
 
-  function scrollVisibleHymnToTop(){
+  function scrollVisibleHymnToTop(behavior = 'smooth'){
     const hymn = visibleHymn();
     if (!hymn) return;
     const title = hymn.querySelector('h3') || hymn;
     const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
-    window.scrollTo({ top: y, behavior: 'smooth' });
+    window.scrollTo({ top: y, behavior });
   }
 
-  // Do not intercept Enter/Done. app.js contains the original fast,
-  // smooth 50 ms Done-key scroll that worked well before the cleanup.
   input.addEventListener('keydown', event => {
-    if (event.key === 'Enter' && input.getAttribute('inputmode') === 'numeric') {
-      enterHandledAt = performance.now();
+    if (event.key !== 'Enter' || input.getAttribute('inputmode') !== 'numeric') return;
+    enterHandledAt = performance.now();
+
+    // Desktop Chrome was continuing the smooth Enter-scroll after the user had
+    // already scrolled back to the controls. That ongoing animation, not the Aa
+    // button itself, was making Aa appear to scroll or require extra clicks.
+    // Own desktop Enter here and use an immediate jump so there is no animation
+    // left running when Aa is clicked later.
+    if (!isMobile) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (searchBtn) searchBtn.click();
+      window.setTimeout(() => scrollVisibleHymnToTop('auto'), 50);
     }
   }, true);
 
@@ -41,7 +51,7 @@
     if (elapsed >= 0 && elapsed < 250) return;
 
     clearTimeout(fallbackTimer);
-    fallbackTimer = window.setTimeout(scrollVisibleHymnToTop, 70);
+    fallbackTimer = window.setTimeout(() => scrollVisibleHymnToTop('smooth'), 70);
   });
 
   // iOS standalone PWAs can preserve a focused input while the app is suspended.
