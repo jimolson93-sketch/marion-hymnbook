@@ -1,6 +1,5 @@
 (() => {
   const input = document.getElementById('searchInput');
-  const searchBtn = document.getElementById('searchBtn');
   if (!input) return;
 
   const isMobile = window.matchMedia('(max-width:700px)').matches;
@@ -15,28 +14,18 @@
       .find(item => getComputedStyle(item).display !== 'none' && item.offsetParent !== null) || null;
   }
 
-  function scrollVisibleHymnToTop(behavior = 'smooth'){
+  function scrollVisibleHymnToTop(){
     const hymn = visibleHymn();
     if (!hymn) return;
     const title = hymn.querySelector('h3') || hymn;
     const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
-    window.scrollTo({ top: y, behavior });
+    window.scrollTo({ top: y, behavior: 'smooth' });
   }
 
+  // Do not intercept Enter/Done. app.js owns the normal smooth hymn scroll.
   input.addEventListener('keydown', event => {
-    if (event.key !== 'Enter' || input.getAttribute('inputmode') !== 'numeric') return;
-    enterHandledAt = performance.now();
-
-    // Desktop Chrome was continuing the smooth Enter-scroll after the user had
-    // already scrolled back to the controls. That ongoing animation, not the Aa
-    // button itself, was making Aa appear to scroll or require extra clicks.
-    // Own desktop Enter here and use an immediate jump so there is no animation
-    // left running when Aa is clicked later.
-    if (!isMobile) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      if (searchBtn) searchBtn.click();
-      window.setTimeout(() => scrollVisibleHymnToTop('auto'), 50);
+    if (event.key === 'Enter' && input.getAttribute('inputmode') === 'numeric') {
+      enterHandledAt = performance.now();
     }
   }, true);
 
@@ -51,7 +40,7 @@
     if (elapsed >= 0 && elapsed < 250) return;
 
     clearTimeout(fallbackTimer);
-    fallbackTimer = window.setTimeout(() => scrollVisibleHymnToTop('smooth'), 70);
+    fallbackTimer = window.setTimeout(scrollVisibleHymnToTop, 70);
   });
 
   // iOS standalone PWAs can preserve a focused input while the app is suspended.
