@@ -17,12 +17,12 @@
   let holdTimer = null;
   let holdTarget = null;
   let holdRecord = null;
-  let holdLink = null;
   let holdTriggered = false;
   let holdStartX = 0;
   let holdStartY = 0;
   let recentTimer = null;
   let searchRecentTimer = null;
+  let initialized = false;
 
   function readList(key) {
     try {
@@ -100,31 +100,28 @@
     holdTimer = null;
     holdTarget = null;
     holdRecord = null;
-    holdLink = null;
   }
 
   function beginHold(event) {
-    if (event.button > 0) return;
-    const favoriteLink = event.target.closest('.index[data-index-mode="favorites"] a.saved-index-entry');
-    const heading = event.target.closest('.hymn h3');
+    if (typeof event.button === 'number' && event.button > 0) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+    const favoriteLink = target.closest('.index[data-index-mode="favorites"] a.saved-index-entry');
+    const heading = target.closest('.hymn h3');
     if (!favoriteLink && !heading) return;
     clearHold();
     holdTriggered = false;
     holdStartX = event.clientX;
     holdStartY = event.clientY;
-    if (favoriteLink) {
-      holdRecord = favoriteLink._mghRecord || null;
-      holdLink = favoriteLink;
-    } else {
-      holdTarget = heading.closest('.hymn');
-    }
+    if (favoriteLink) holdRecord = favoriteLink._mghRecord || null;
+    else holdTarget = heading.closest('.hymn');
     holdTimer = setTimeout(() => {
-      const target = holdTarget;
+      const hymn = holdTarget;
       const record = holdRecord;
       holdTriggered = true;
       clearHold();
       if (record) removeFavoriteRecord(record);
-      else if (target) toggleFavorite(target);
+      else if (hymn) toggleFavorite(hymn);
     }, HOLD_MS);
   }
 
@@ -155,6 +152,7 @@
   }
 
   function scheduleSearchRecent() { clearTimeout(searchRecentTimer); searchRecentTimer = setTimeout(recordVisibleRecentForSearch, SEARCH_RECENT_DELAY_MS); }
+
   function scheduleVisibleRecent() {
     clearTimeout(recentTimer);
     recentTimer = setTimeout(() => {
@@ -169,25 +167,36 @@
     drawer.className = 'index-hymn-drawer';
     drawer.setAttribute('role', 'region');
     drawer.setAttribute('aria-label', target.querySelector('h3')?.textContent?.trim() || 'Hymn');
-    Array.from(target.children).forEach(child => { if (!child.matches('h3, .hymn-step-nav')) drawer.appendChild(child.cloneNode(true)); });
+    Array.from(target.children).forEach(child => {
+      if (!child.matches('h3, .hymn-step-nav')) drawer.appendChild(child.cloneNode(true));
+    });
     return drawer;
   }
 
   function closeDrawers(index, exceptLink = null) {
     index.querySelectorAll('.index-hymn-drawer').forEach(drawer => drawer.remove());
     index.querySelectorAll('a.index-expanded').forEach(link => {
-      if (link !== exceptLink) { link.classList.remove('index-expanded'); link.setAttribute('aria-expanded', 'false'); }
+      if (link !== exceptLink) {
+        link.classList.remove('index-expanded');
+        link.setAttribute('aria-expanded', 'false');
+      }
     });
   }
 
   function openIndexEntry(event, record, link) {
-    event.preventDefault(); event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
     if (holdTriggered) { holdTriggered = false; return; }
     const index = link.closest('.index');
     const target = hymnFromRecord(record);
     if (!index || !target) return;
     const existing = link.nextElementSibling?.classList.contains('index-hymn-drawer') ? link.nextElementSibling : null;
-    if (existing) { existing.remove(); link.classList.remove('index-expanded'); link.setAttribute('aria-expanded', 'false'); return; }
+    if (existing) {
+      existing.remove();
+      link.classList.remove('index-expanded');
+      link.setAttribute('aria-expanded', 'false');
+      return;
+    }
     closeDrawers(index, link);
     const drawer = buildDrawer(target);
     link.insertAdjacentElement('afterend', drawer);
@@ -202,75 +211,138 @@
     link.className = 'index-entry ' + extraClass + (includeBook ? ' has-book-label' : '');
     link.setAttribute('aria-expanded', 'false');
     link._mghRecord = record;
-    const number = document.createElement('span'); number.className = 'index-number'; number.textContent = record.number;
-    const title = document.createElement('span'); title.className = 'index-title'; title.textContent = record.title; title.dataset.fullTitle = record.title;
+
+    const number = document.createElement('span');
+    number.className = 'index-number';
+    number.textContent = record.number;
+    const title = document.createElement('span');
+    title.className = 'index-title';
+    title.textContent = record.title;
+    title.dataset.fullTitle = record.title;
     link.append(number, title);
-    if (includeBook) { const book = document.createElement('span'); book.className = 'index-book-label'; book.textContent = BOOKS[record.sectionId]?.short || ''; link.appendChild(book); }
+
+    if (includeBook) {
+      const book = document.createElement('span');
+      book.className = 'index-book-label';
+      book.textContent = BOOKS[record.sectionId]?.short || '';
+      link.appendChild(book);
+    }
+
     link.addEventListener('click', event => openIndexEntry(event, record, link));
     return link;
   }
 
   function ensureIndexShell(index) {
     if (!index || index.dataset.savedViewsReady === 'true') return;
-    const tabs = document.createElement('div'); tabs.className = 'index-view-tabs'; tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', 'Index view');
-    [['all','All Hymns'],['favorites','Favorites'],['recent','Recent']].forEach(([mode,label]) => {
-      const button = document.createElement('button'); button.type = 'button'; button.dataset.indexMode = mode; button.textContent = label; button.setAttribute('role','tab');
-      button.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); renderMode(index, mode); }); tabs.appendChild(button);
+    const tabs = document.createElement('div');
+    tabs.className = 'index-view-tabs';
+    tabs.setAttribute('role', 'tablist');
+    tabs.setAttribute('aria-label', 'Index view');
+
+    [['all', 'All Hymns'], ['favorites', 'Favorites'], ['recent', 'Recent']].forEach(([mode, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.indexMode = mode;
+      button.textContent = label;
+      button.setAttribute('role', 'tab');
+      button.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        renderMode(index, mode);
+      });
+      tabs.appendChild(button);
     });
-    const content = document.createElement('div'); content.className = 'index-view-content'; index.replaceChildren(tabs, content); index.dataset.savedViewsReady = 'true'; index.dataset.indexMode = 'all'; setTabState(index,'all');
+
+    const content = document.createElement('div');
+    content.className = 'index-view-content';
+    index.replaceChildren(tabs, content);
+    index.dataset.savedViewsReady = 'true';
+    index.dataset.indexMode = 'all';
+    setTabState(index, 'all');
   }
 
   function setTabState(index, mode) {
     index.dataset.indexMode = mode;
     index.querySelectorAll('.index-view-tabs button').forEach(button => {
-      const active = button.dataset.indexMode === mode; button.classList.toggle('active', active); button.setAttribute('aria-selected', active ? 'true' : 'false');
+      const active = button.dataset.indexMode === mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
     });
   }
 
   function renderAll(index) {
-    const section = index.closest('.section'); const content = index.querySelector('.index-view-content'); if (!section || !content) return;
+    const section = index.closest('.section');
+    const content = index.querySelector('.index-view-content');
+    if (!section || !content) return;
     const fragment = document.createDocumentFragment();
     section.querySelectorAll('.hymn').forEach(hymn => {
       const info = hymnInfo(hymn);
-      if (info) {
-        const entry = makeEntry(info, false, 'book-index-entry');
-        entry.classList.toggle('is-favorite-index', isFavorite(info.key));
-        fragment.appendChild(entry);
-      }
+      if (!info) return;
+      const entry = makeEntry(info, false, 'book-index-entry');
+      entry.classList.toggle('is-favorite-index', isFavorite(info.key));
+      fragment.appendChild(entry);
     });
     content.replaceChildren(fragment);
   }
 
   function renderFavorites(index) {
-    const content = index.querySelector('.index-view-content'); if (!content) return;
-    const fragment = document.createDocumentFragment(); let count = 0;
+    const content = index.querySelector('.index-view-content');
+    if (!content) return;
+    const fragment = document.createDocumentFragment();
+    let count = 0;
+
     Object.keys(BOOKS).forEach(sectionId => {
-      const items = favorites.filter(item => item.sectionId === sectionId && hymnFromRecord(item)).sort((a,b) => Number(a.number)-Number(b.number));
+      const items = favorites
+        .filter(item => item.sectionId === sectionId && hymnFromRecord(item))
+        .sort((a, b) => Number(a.number) - Number(b.number));
       if (!items.length) return;
       count += items.length;
-      const heading = document.createElement('div'); heading.className = 'saved-index-book-heading'; heading.textContent = BOOKS[sectionId].name; fragment.appendChild(heading);
+      const heading = document.createElement('div');
+      heading.className = 'saved-index-book-heading';
+      heading.textContent = BOOKS[sectionId].name;
+      fragment.appendChild(heading);
       items.forEach(item => fragment.appendChild(makeEntry(item, false)));
     });
-    if (!count) { const empty = document.createElement('div'); empty.className = 'saved-index-empty'; empty.innerHTML = '<strong>No favorites yet.</strong><span>Press and hold a hymn title to add it.</span>'; fragment.appendChild(empty); }
+
+    if (!count) {
+      const empty = document.createElement('div');
+      empty.className = 'saved-index-empty';
+      empty.innerHTML = '<strong>No favorites yet.</strong><span>Press and hold a hymn title to add it.</span>';
+      fragment.appendChild(empty);
+    }
     content.replaceChildren(fragment);
   }
 
   function renderRecent(index) {
-    const content = index.querySelector('.index-view-content'); if (!content) return;
-    const valid = recent.filter(item => hymnFromRecord(item)).slice(0, RECENT_LIMIT); const fragment = document.createDocumentFragment();
-    if (!valid.length) { const empty = document.createElement('div'); empty.className = 'saved-index-empty'; empty.innerHTML = '<strong>No recent hymns yet.</strong><span>Hymns you open will appear here.</span>'; fragment.appendChild(empty); }
-    else valid.forEach(item => fragment.appendChild(makeEntry(item, true));
+    const content = index.querySelector('.index-view-content');
+    if (!content) return;
+    const valid = recent.filter(item => hymnFromRecord(item)).slice(0, RECENT_LIMIT);
+    const fragment = document.createDocumentFragment();
+    if (!valid.length) {
+      const empty = document.createElement('div');
+      empty.className = 'saved-index-empty';
+      empty.innerHTML = '<strong>No recent hymns yet.</strong><span>Hymns you open will appear here.</span>';
+      fragment.appendChild(empty);
+    } else {
+      valid.forEach(item => fragment.appendChild(makeEntry(item, true)));
+    }
     content.replaceChildren(fragment);
   }
 
   function renderMode(index, mode) {
-    ensureIndexShell(index); closeDrawers(index); setTabState(index, mode);
-    if (mode === 'favorites') renderFavorites(index); else if (mode === 'recent') renderRecent(index); else renderAll(index);
+    ensureIndexShell(index);
+    closeDrawers(index);
+    setTabState(index, mode);
+    if (mode === 'favorites') renderFavorites(index);
+    else if (mode === 'recent') renderRecent(index);
+    else renderAll(index);
   }
 
   function setupVisibleIndex() {
-    const index = activeSection()?.querySelector('.index.show'); if (!index) return;
-    ensureIndexShell(index); renderMode(index, index.dataset.indexMode || 'all');
+    const index = activeSection()?.querySelector('.index.show');
+    if (!index) return;
+    ensureIndexShell(index);
+    renderMode(index, index.dataset.indexMode || 'all');
   }
 
   function refreshSavedIndexIfVisible(includeAll = false) {
@@ -280,21 +352,51 @@
     if (mode === 'favorites' || mode === 'recent' || (includeAll && mode === 'all')) renderMode(index, mode);
   }
 
-  document.addEventListener('mgh:data-ready', () => {
+  function initialize() {
+    if (initialized) return;
+    if (!document.querySelector('.section .hymn')) return;
+    initialized = true;
     applyAllFavoriteStates();
+
     document.addEventListener('pointerdown', beginHold, true);
-    document.addEventListener('pointermove', moveHold, { capture:true, passive:true });
+    document.addEventListener('pointermove', moveHold, { capture: true, passive: true });
     document.addEventListener('pointerup', clearHold, true);
     document.addEventListener('pointercancel', clearHold, true);
-    document.addEventListener('contextmenu', event => { if (event.target.closest('.hymn h3, .index[data-index-mode="favorites"] a.saved-index-entry')) event.preventDefault(); });
-    const observer = new MutationObserver(mutations => { if (mutations.some(m => m.type === 'attributes' && m.attributeName === 'class' && m.target.classList?.contains('hymn'))) scheduleVisibleRecent(); });
-    document.querySelectorAll('.section').forEach(section => observer.observe(section, { subtree:true, attributes:true, attributeFilter:['class'] }));
+    document.addEventListener('contextmenu', event => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('.hymn h3, .index[data-index-mode="favorites"] a.saved-index-entry')) event.preventDefault();
+    });
+
+    const observer = new MutationObserver(mutations => {
+      if (mutations.some(m => m.type === 'attributes' && m.attributeName === 'class' && m.target.classList?.contains('hymn'))) scheduleVisibleRecent();
+    });
+    document.querySelectorAll('.section').forEach(section => observer.observe(section, { subtree: true, attributes: true, attributeFilter: ['class'] }));
+
     const search = document.getElementById('searchInput');
     if (search) {
-      search.addEventListener('input', () => { if (/^\d+$/.test(search.value.trim())) scheduleSearchRecent(); else clearTimeout(searchRecentTimer); }, true);
-      search.addEventListener('blur', () => { clearTimeout(searchRecentTimer); setTimeout(recordVisibleRecentForSearch,80); });
-      search.addEventListener('keydown', event => { if (event.key === 'Enter') { clearTimeout(searchRecentTimer); setTimeout(recordVisibleRecentForSearch,100); } }, true);
+      search.addEventListener('input', () => {
+        if (/^\d+$/.test(search.value.trim())) scheduleSearchRecent();
+        else clearTimeout(searchRecentTimer);
+      }, true);
+      search.addEventListener('blur', () => {
+        clearTimeout(searchRecentTimer);
+        setTimeout(recordVisibleRecentForSearch, 80);
+      });
+      search.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+          clearTimeout(searchRecentTimer);
+          setTimeout(recordVisibleRecentForSearch, 100);
+        }
+      }, true);
     }
-    document.addEventListener('click', event => { if (event.target.closest('#indexBtn')) setTimeout(setupVisibleIndex,30); });
-  }, { once:true });
+
+    document.addEventListener('click', event => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('#indexBtn')) setTimeout(setupVisibleIndex, 30);
+    });
+  }
+
+  document.addEventListener('mgh:data-ready', initialize, { once: true });
+  if (document.querySelector('.section .hymn')) initialize();
+  else setTimeout(initialize, 1000);
 })();
