@@ -61,6 +61,11 @@
     });
 
     wrap.append(options);
+
+    // Keep the app-level share action beside the app-level appearance choices.
+    const shareRow = document.querySelector('.share-row');
+    if (shareRow) wrap.appendChild(shareRow);
+
     const version = fontControls.querySelector('.app-version');
     if (version) fontControls.insertBefore(wrap, version);
     else fontControls.appendChild(wrap);
