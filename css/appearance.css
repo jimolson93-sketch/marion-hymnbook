@@ -1,17 +1,9 @@
 .appearance-controls{
   width:100%;
-  margin-top:10px;
-  padding-top:10px;
+  margin-top:9px;
+  padding-top:9px;
   padding-bottom:3px;
   border-top:1px solid rgba(154,159,152,.20);
-}
-
-.appearance-label{
-  margin-bottom:7px;
-  text-align:center;
-  color:#5f675f;
-  font-size:12px;
-  font-weight:600;
 }
 
 .appearance-options{
@@ -146,8 +138,7 @@ html[data-theme="dark"] .font-size-controls{
 }
 
 html[data-theme="dark"] .font-size-label,
-html[data-theme="dark"] .font-size-display,
-html[data-theme="dark"] .appearance-label{
+html[data-theme="dark"] .font-size-display{
   color:#b1b8ae !important;
 }
 
