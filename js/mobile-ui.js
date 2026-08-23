@@ -87,24 +87,39 @@
 
     const GESTURE_START_PX = 8;
     const VERTICAL_RATIO = 1.15;
-    let hideTimer = null;
+    const SCROLL_END_MS = 180;
+    let scrollEndTimer = null;
     let touchStartX = 0;
     let touchStartY = 0;
     let gestureMode = null;
-    let verticalGestureActive = false;
+    let fingerDown = false;
+    let userScrollSession = false;
 
     function hide() {
       topFade.classList.remove('visible');
       bottomFade.classList.remove('visible');
     }
 
-    function scheduleHide() {
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(hide, 220);
+    function cancelScrollSession() {
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = null;
+      gestureMode = null;
+      fingerDown = false;
+      userScrollSession = false;
+      hide();
+    }
+
+    function endScrollSessionSoon() {
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(() => {
+        userScrollSession = false;
+        gestureMode = null;
+        hide();
+      }, SCROLL_END_MS);
     }
 
     function showForUserScroll() {
-      if (!verticalGestureActive || !window.matchMedia(PHONE_QUERY).matches) {
+      if (!userScrollSession || !window.matchMedia(PHONE_QUERY).matches) {
         hide();
         return;
       }
@@ -115,27 +130,28 @@
 
       topFade.classList.toggle('visible', y > 6);
       bottomFade.classList.toggle('visible', max - y > 6);
-      scheduleHide();
+
+      if (!fingerDown) endScrollSessionSoon();
     }
 
     document.addEventListener('touchstart', event => {
       if (event.touches.length !== 1 || !window.matchMedia(PHONE_QUERY).matches) {
-        gestureMode = null;
-        verticalGestureActive = false;
-        hide();
+        cancelScrollSession();
         return;
       }
 
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = null;
       touchStartX = event.touches[0].clientX;
       touchStartY = event.touches[0].clientY;
       gestureMode = null;
-      verticalGestureActive = false;
-      clearTimeout(hideTimer);
+      fingerDown = true;
+      userScrollSession = false;
       hide();
     }, { passive: true });
 
     document.addEventListener('touchmove', event => {
-      if (event.touches.length !== 1 || !window.matchMedia(PHONE_QUERY).matches) return;
+      if (!fingerDown || event.touches.length !== 1 || !window.matchMedia(PHONE_QUERY).matches) return;
 
       const dx = event.touches[0].clientX - touchStartX;
       const dy = event.touches[0].clientY - touchStartY;
@@ -145,28 +161,40 @@
       if (!gestureMode) {
         if (Math.max(absX, absY) < GESTURE_START_PX) return;
         gestureMode = absY > absX * VERTICAL_RATIO ? 'vertical' : 'other';
-        verticalGestureActive = gestureMode === 'vertical';
-        if (!verticalGestureActive) hide();
+        userScrollSession = gestureMode === 'vertical';
+        if (!userScrollSession) {
+          hide();
+          return;
+        }
       }
 
-      if (verticalGestureActive) showForUserScroll();
+      if (userScrollSession) showForUserScroll();
     }, { passive: true });
 
-    function endGesture() {
-      if (verticalGestureActive) scheduleHide();
-      else hide();
-      gestureMode = null;
-      verticalGestureActive = false;
-    }
+    document.addEventListener('touchend', () => {
+      fingerDown = false;
+      if (userScrollSession) endScrollSessionSoon();
+      else {
+        gestureMode = null;
+        hide();
+      }
+    }, { passive: true });
 
-    document.addEventListener('touchend', endGesture, { passive: true });
-    document.addEventListener('touchcancel', endGesture, { passive: true });
+    document.addEventListener('touchcancel', cancelScrollSession, { passive: true });
 
     window.addEventListener('scroll', () => {
-      if (verticalGestureActive) showForUserScroll();
+      if (!userScrollSession) return;
+      showForUserScroll();
     }, { passive: true });
-    window.addEventListener('resize', hide, { passive: true });
-    window.addEventListener('pageshow', hide, { passive: true });
+
+    window.addEventListener('resize', cancelScrollSession, { passive: true });
+    window.addEventListener('blur', cancelScrollSession, { passive: true });
+    window.addEventListener('pagehide', cancelScrollSession, { passive: true });
+    window.addEventListener('pageshow', cancelScrollSession, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') cancelScrollSession();
+      else hide();
+    });
   }
 
   function init() {
