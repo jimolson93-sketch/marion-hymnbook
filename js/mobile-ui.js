@@ -85,15 +85,26 @@
 
     document.body.append(topFade, bottomFade);
 
+    const GESTURE_START_PX = 8;
+    const VERTICAL_RATIO = 1.15;
     let hideTimer = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let gestureMode = null;
+    let verticalGestureActive = false;
 
     function hide() {
       topFade.classList.remove('visible');
       bottomFade.classList.remove('visible');
     }
 
-    function showForScroll() {
-      if (!window.matchMedia(PHONE_QUERY).matches) {
+    function scheduleHide() {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(hide, 220);
+    }
+
+    function showForUserScroll() {
+      if (!verticalGestureActive || !window.matchMedia(PHONE_QUERY).matches) {
         hide();
         return;
       }
@@ -104,13 +115,58 @@
 
       topFade.classList.toggle('visible', y > 6);
       bottomFade.classList.toggle('visible', max - y > 6);
-
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(hide, 220);
+      scheduleHide();
     }
 
-    window.addEventListener('scroll', showForScroll, { passive: true });
+    document.addEventListener('touchstart', event => {
+      if (event.touches.length !== 1 || !window.matchMedia(PHONE_QUERY).matches) {
+        gestureMode = null;
+        verticalGestureActive = false;
+        hide();
+        return;
+      }
+
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+      gestureMode = null;
+      verticalGestureActive = false;
+      clearTimeout(hideTimer);
+      hide();
+    }, { passive: true });
+
+    document.addEventListener('touchmove', event => {
+      if (event.touches.length !== 1 || !window.matchMedia(PHONE_QUERY).matches) return;
+
+      const dx = event.touches[0].clientX - touchStartX;
+      const dy = event.touches[0].clientY - touchStartY;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
+      if (!gestureMode) {
+        if (Math.max(absX, absY) < GESTURE_START_PX) return;
+        gestureMode = absY > absX * VERTICAL_RATIO ? 'vertical' : 'other';
+        verticalGestureActive = gestureMode === 'vertical';
+        if (!verticalGestureActive) hide();
+      }
+
+      if (verticalGestureActive) showForUserScroll();
+    }, { passive: true });
+
+    function endGesture() {
+      if (verticalGestureActive) scheduleHide();
+      else hide();
+      gestureMode = null;
+      verticalGestureActive = false;
+    }
+
+    document.addEventListener('touchend', endGesture, { passive: true });
+    document.addEventListener('touchcancel', endGesture, { passive: true });
+
+    window.addEventListener('scroll', () => {
+      if (verticalGestureActive) showForUserScroll();
+    }, { passive: true });
     window.addEventListener('resize', hide, { passive: true });
+    window.addEventListener('pageshow', hide, { passive: true });
   }
 
   function init() {
