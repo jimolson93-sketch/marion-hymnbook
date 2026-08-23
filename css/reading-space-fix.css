@@ -11,6 +11,13 @@ body:not(.show-all-mode) .section:not(.hidden) .hymn.show{
   }
 }
 
+/* Desktop streaming space: allow hymns to scroll high enough to isolate verses in OBS. */
+@media (min-width:1025px){
+  body:not(.show-all-mode) .section:not(.hidden) .hymn.show{
+    padding-bottom:30em !important;
+  }
+}
+
 /* All Hymns remains compact; never inherit standalone reading height. */
 body.show-all-mode .section:not(.hidden) .hymn{
   min-height:0 !important;
