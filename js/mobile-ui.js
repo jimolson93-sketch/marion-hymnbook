@@ -1,4 +1,6 @@
 (() => {
+  const PHONE_QUERY = '(max-width:700px)';
+
   function buildBookPicker() {
     const nav = document.querySelector('.nav[role="tablist"]');
     if (!nav || document.querySelector('.mobile-book-picker')) return;
@@ -70,8 +72,50 @@
     nav.parentNode.insertBefore(picker, nav);
   }
 
+  function buildScrollFades() {
+    if (document.querySelector('.mobile-scroll-fade')) return;
+
+    const topFade = document.createElement('div');
+    topFade.className = 'mobile-scroll-fade top';
+    topFade.setAttribute('aria-hidden', 'true');
+
+    const bottomFade = document.createElement('div');
+    bottomFade.className = 'mobile-scroll-fade bottom';
+    bottomFade.setAttribute('aria-hidden', 'true');
+
+    document.body.append(topFade, bottomFade);
+
+    let hideTimer = null;
+
+    function hide() {
+      topFade.classList.remove('visible');
+      bottomFade.classList.remove('visible');
+    }
+
+    function showForScroll() {
+      if (!window.matchMedia(PHONE_QUERY).matches) {
+        hide();
+        return;
+      }
+
+      const root = document.documentElement;
+      const y = window.scrollY || root.scrollTop || 0;
+      const max = Math.max(0, root.scrollHeight - window.innerHeight);
+
+      topFade.classList.toggle('visible', y > 6);
+      bottomFade.classList.toggle('visible', max - y > 6);
+
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(hide, 220);
+    }
+
+    window.addEventListener('scroll', showForScroll, { passive: true });
+    window.addEventListener('resize', hide, { passive: true });
+  }
+
   function init() {
     buildBookPicker();
+    buildScrollFades();
   }
 
   if (document.readyState === 'loading') {
