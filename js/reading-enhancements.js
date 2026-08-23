@@ -197,6 +197,12 @@
     if (touchHymn) touchHymn.classList.remove('hymn-swipe-source-hidden');
   }
 
+  function clearMobileScrollFades() {
+    document.querySelectorAll('.mobile-scroll-fade.visible').forEach(fade => {
+      fade.classList.remove('visible');
+    });
+  }
+
   function updateSearchForProgress(progress) {
     const search = document.getElementById('searchInput');
     if (!search) return;
@@ -219,6 +225,7 @@
   function settleSwipe(commit) {
     if (!touchHymn || !currentPanel || !nextPanel) {
       clearSwipeViewport();
+      clearMobileScrollFades();
       resetSwipeState();
       return;
     }
@@ -239,6 +246,7 @@
 
       setTimeout(() => {
         clearSwipeViewport();
+        clearMobileScrollFades();
         resetSwipeState();
       }, SETTLE_MS);
       return;
@@ -265,6 +273,7 @@
       const title = destination.querySelector('h3') || destination;
       const y = title.getBoundingClientRect().top + window.pageYOffset - 8;
       window.scrollTo({ top: y, behavior: 'auto' });
+      clearMobileScrollFades();
       resetSwipeState();
     }, SETTLE_MS);
   }
@@ -340,6 +349,7 @@
       const search = document.getElementById('searchInput');
       if (search) search.value = originalSearchValue;
       clearSwipeViewport();
+      clearMobileScrollFades();
       resetSwipeState();
       return;
     }
