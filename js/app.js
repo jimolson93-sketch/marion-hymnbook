@@ -206,11 +206,24 @@ document.addEventListener("mgh:data-ready", () => {
   function close(){ if (drawer.classList.contains('open')) setOpen(false); }
   setOpen(false);
 
+  function restoreDesktopScroll(y){
+    if (!isDesktop) return;
+    const restore = () => window.scrollTo({ top:y, left:window.scrollX, behavior:'auto' });
+    restore();
+    requestAnimationFrame(() => {
+      restore();
+      requestAnimationFrame(restore);
+    });
+    setTimeout(restore, 350);
+  }
+
   btn.addEventListener('click', function(e){
     e.preventDefault();
     e.stopPropagation();
-    // Aa is a pure toggle. It never changes scroll position or focus.
-    setOpen(!drawer.classList.contains('open'));
+    const opening = !drawer.classList.contains('open');
+    const scrollY = window.scrollY;
+    setOpen(opening);
+    if (opening) restoreDesktopScroll(scrollY);
   });
 
   drawer.addEventListener('click', e => e.stopPropagation());
