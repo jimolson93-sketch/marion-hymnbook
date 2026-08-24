@@ -24,11 +24,3 @@
     border-color:var(--accent) !important;
   }
 }
-
-/* Desktop: opening the Aa drawer changes header height. Disable browser scroll
-   anchoring so Edge does not shift the viewport to keep the hymn text fixed. */
-@media (min-width:701px){
-  html{
-    overflow-anchor:none;
-  }
-}
