@@ -1,9 +1,9 @@
 'use strict';
 
 const CACHE_PREFIX = 'mgh-hymnbook-';
-const CACHE_VERSION = '1.2.50';
+const CACHE_VERSION = '1.2.54';
 const APP_ASSETS = [
-  './','./index.html','./manifest.webmanifest','./css/styles.css','./css/theme.css','./css/index.css','./css/favorites-recent.css','./css/reading-enhancements.css','./css/startup-guidance.css','./css/search-enhancements.css','./css/view-tools.css','./css/mobile-ui.css','./css/appearance.css','./css/show-all-fix.css','./css/verse-number-fix.css','./css/interaction-fix.css','./css/reading-space-fix.css','./css/share.css','./js/bootstrap.js','./js/app.js','./js/reading-enhancements.js','./js/startup-guidance.js','./js/search-enhancements.js','./js/view-tools.js','./js/index-format.js','./js/favorites-recent.js','./js/mobile-ui.js','./js/appearance.js','./js/show-all-fix.js','./js/keyboard-scroll-fix.js','./js/share.js','./js/pwa.js','./data/new-believers.html','./data/gospel.html','./data/believers.html','./version.json','./icons/app-icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./icons/share-qr.svg'
+  './','./index.html','./manifest.webmanifest','./css/styles.css','./css/theme.css','./css/index.css','./css/favorites-recent.css','./css/reading-enhancements.css','./css/startup-guidance.css','./css/search-enhancements.css','./css/view-tools.css','./css/mobile-ui.css','./css/appearance.css','./css/show-all-fix.css','./css/verse-number-fix.css','./css/interaction-fix.css','./css/reading-space-fix.css','./css/share.css','./js/bootstrap.js','./js/app.js','./js/reading-enhancements.js','./js/startup-guidance.js','./js/search-enhancements.js','./js/search-flow.js','./js/view-tools.js','./js/index-format.js','./js/favorites-recent.js','./js/mobile-ui.js','./js/appearance.js','./js/show-all-fix.js','./js/keyboard-scroll-fix.js','./js/share.js','./js/pwa.js','./data/new-believers.html','./data/gospel.html','./data/believers.html','./version.json','./icons/app-icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./icons/share-qr.svg'
 ];
 function cacheName(version){return CACHE_PREFIX+version;}
 async function populate(version){const name=cacheName(version);const cache=await caches.open(name);await cache.addAll(APP_ASSETS.map(url=>new Request(url,{cache:'reload'})));return name;}
