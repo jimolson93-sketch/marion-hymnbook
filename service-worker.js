@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'mgh-hymnbook-';
-const CACHE_VERSION = '1.2.59';
+const CACHE_VERSION = '1.2.60';
 const FONT_ASSETS = [
   'https://raw.githubusercontent.com/adobe-fonts/source-sans/release/WOFF2/VF/SourceSans3VF-Upright.otf.woff2',
   'https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/main/fonts/webfonts/AtkinsonHyperlegibleNext%5Bwght%5D.woff2'
