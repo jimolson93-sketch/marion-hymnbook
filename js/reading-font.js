@@ -16,7 +16,7 @@
     if(button){
       const active = mode === 'accessible';
       button.classList.toggle('active', active);
-      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      button.setAttribute('aria-checked', active ? 'true' : 'false');
     }
     if(persist){
       try{ localStorage.setItem(STORAGE_KEY, mode); }catch(_){}
@@ -30,17 +30,22 @@
     const wrap = document.createElement('div');
     wrap.className = 'reading-font-controls';
 
+    const label = document.createElement('span');
+    label.className = 'reading-font-label';
+    label.textContent = 'Low Vision';
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'reading-font-toggle';
-    button.textContent = 'Aa Low Vision';
+    button.setAttribute('role','switch');
     button.setAttribute('aria-label','Use low vision reading font');
-    button.setAttribute('aria-pressed','false');
+    button.setAttribute('aria-checked','false');
+    button.innerHTML = '<span class="reading-font-switch-knob" aria-hidden="true"></span>';
     button.addEventListener('click', () => {
       applyMode(readMode() === 'accessible' ? 'default' : 'accessible', true);
     });
 
-    wrap.appendChild(button);
+    wrap.append(label, button);
     appearance.insertBefore(wrap, appearance.firstChild);
     applyMode(readMode(), false);
   }
