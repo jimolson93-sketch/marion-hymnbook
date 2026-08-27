@@ -1,10 +1,12 @@
 .appearance-controls{
-  display:flex;
+  display:grid;
+  grid-template-columns:1fr 38px;
   align-items:center;
-  justify-content:space-between;
-  width:min(100%,260px);
-  margin:5px auto 3px;
-  padding:0 2px;
+  column-gap:12px;
+  width:min(100%,240px);
+  min-height:30px;
+  margin:2px auto;
+  padding:0;
 }
 
 .appearance-label{
@@ -12,6 +14,7 @@
   font-size:12px;
   font-weight:600;
   line-height:1;
+  text-align:left;
 }
 
 .font-size-controls .appearance-toggle{
@@ -29,33 +32,21 @@
   cursor:pointer;
   transition:background .15s ease;
 }
-
-.appearance-switch-knob{
-  position:absolute;
-  top:2px;
-  left:2px;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#fff;
-  box-shadow:0 1px 3px rgba(0,0,0,.20);
-  transition:transform .15s ease;
-}
-
+.appearance-switch-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.20);transition:transform .15s ease;}
 .font-size-controls .appearance-toggle.active{background:#747d72 !important;}
 .font-size-controls .appearance-toggle.active .appearance-switch-knob{transform:translateX(16px);}
 
 .font-size-label{display:none !important;}
 .font-size-controls{width:100% !important;max-width:560px !important;}
-.font-size-slider-row{display:grid !important;grid-template-columns:34px minmax(0,1fr) 34px 42px !important;align-items:center !important;gap:8px !important;width:min(100%,360px) !important;margin:2px auto 0 !important;}
-.font-size-controls .font-size-slider-row > button{width:34px !important;min-width:34px !important;height:30px !important;min-height:30px !important;margin:0 !important;padding:0 !important;border:0 !important;border-radius:6px !important;background:transparent !important;color:#626961 !important;font-size:14px !important;font-weight:650 !important;box-shadow:none !important;}
+.font-size-slider-row{display:grid !important;grid-template-columns:44px 54px 44px !important;justify-content:center !important;align-items:center !important;gap:18px !important;width:min(100%,240px) !important;margin:0 auto 4px !important;}
+.font-size-controls .font-size-slider-row > button{width:44px !important;min-width:44px !important;height:38px !important;min-height:38px !important;margin:0 !important;padding:0 !important;border:0 !important;border-radius:8px !important;background:transparent !important;color:#626961 !important;font-size:17px !important;font-weight:650 !important;box-shadow:none !important;}
 .font-size-controls .font-size-slider-row > button:disabled{opacity:.35 !important;}
-#fontSizeSlider{width:100% !important;margin:0 !important;}
-.font-size-display{grid-column:4 !important;grid-row:1 !important;width:auto !important;margin:0 !important;color:#777e75 !important;font-size:11px !important;font-weight:500 !important;line-height:1 !important;text-align:right !important;}
-.drawer-footer{display:grid;grid-template-columns:28px 1fr 28px;align-items:center;width:min(100%,260px);min-height:26px;margin:2px auto 0;}
+#fontSizeSlider{display:none !important;}
+.font-size-display{grid-column:2 !important;grid-row:1 !important;width:auto !important;margin:0 !important;color:#777e75 !important;font-size:12px !important;font-weight:600 !important;line-height:1 !important;text-align:center !important;}
+.drawer-footer{display:grid;grid-template-columns:28px 1fr 28px;align-items:center;width:min(100%,240px);min-height:26px;margin:1px auto 0;}
 .drawer-footer .app-version{grid-column:2;margin:0 !important;padding:0 !important;border:0 !important;color:rgba(91,98,89,.42) !important;font-size:9px !important;line-height:1 !important;text-align:center;}
 .drawer-footer .share-row{grid-column:3;}
-.settings-drawer.open{max-height:170px;overflow:visible;}
+.settings-drawer.open{max-height:155px;overflow:visible;}
 
 html[data-theme="dark"]{color-scheme:dark;--accent:#828c80;--accent-2:#9aa397;--muted:#a5aca2;--bg:#1d211e;--card:#252a26;--text:#e7e9e5;}
 html[data-theme="dark"],html[data-theme="dark"] body{background:#1d211e !important;color:#e7e9e5 !important;}
