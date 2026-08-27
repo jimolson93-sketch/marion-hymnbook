@@ -2,11 +2,9 @@
   const DISMISS_KEY = 'mghInstallPromptDismissed';
   const VERSION_KEY = 'mgh-deployed-version';
   const RESTORE_KEY = 'mgh-update-restore-state';
+  const CHECK_INTERVAL = 45000;
   let deferredInstallPrompt = null;
   let checking = false;
-  let resumeArmed = false;
-  let bootComplete = false;
-  let lastResumeCheck = 0;
 
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -137,10 +135,9 @@
           section.querySelectorAll('.hymn.show').forEach(hymn => hymn.classList.remove('show'));
           restored.classList.add('show');
         }
-
         if (!restored) return;
-        try { localStorage.removeItem(RESTORE_KEY); } catch (_) {}
 
+        try { localStorage.removeItem(RESTORE_KEY); } catch (_) {}
         const restoreScroll = () => window.scrollTo({
           top: Number(state.scrollY) || 0,
           left: 0,
@@ -179,11 +176,8 @@
     return completed;
   }
 
-  async function checkForUpdateOnResume(registration) {
+  async function checkForLiveUpdate(registration) {
     if (checking || document.visibilityState !== 'visible' || !navigator.onLine) return;
-    const now = Date.now();
-    if (now - lastResumeCheck < 1200) return;
-    lastResumeCheck = now;
     checking = true;
     try {
       const deployed = await fetchDeployedVersion();
@@ -202,7 +196,7 @@
       if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       window.location.reload();
     } catch (_) {
-      // Keep the current working version if the update check or cache refresh fails.
+      // Keep the current working version if an update check fails.
     } finally {
       checking = false;
     }
@@ -228,34 +222,24 @@
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' });
-      bootComplete = true;
 
-      const armResume = () => {
-        if (!bootComplete) return;
-        resumeArmed = true;
-        saveReadingStateForReload();
-        registration.update().catch(() => {});
-      };
+      // Quietly check while the hymn book is actively open. Do not check
+      // immediately on launch; the first live check happens after 45 seconds.
+      setInterval(() => checkForLiveUpdate(registration), CHECK_INTERVAL);
 
-      const tryResume = () => {
-        if (!bootComplete || !resumeArmed || document.visibilityState !== 'visible') return;
-        resumeArmed = false;
-        setTimeout(() => checkForUpdateOnResume(registration), 100);
-      };
-
+      // If the app becomes visible again, wait briefly and check once. This is
+      // supplemental only; the regular visible timer is the primary mechanism.
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') armResume();
-        else tryResume();
+        if (document.visibilityState === 'visible') {
+          setTimeout(() => checkForLiveUpdate(registration), 1500);
+        }
       });
-      window.addEventListener('pagehide', armResume);
-      window.addEventListener('pageshow', event => {
-        if (event.persisted || resumeArmed) tryResume();
-      });
-      window.addEventListener('focus', tryResume);
 
       window.addEventListener('online', () => {
         showOfflineStatus();
-        tryResume();
+        if (document.visibilityState === 'visible') {
+          setTimeout(() => checkForLiveUpdate(registration), 500);
+        }
       });
       window.addEventListener('offline', showOfflineStatus);
 
