@@ -5,7 +5,6 @@
   font-weight:200 900;
   font-display:swap;
 }
-
 @font-face{
   font-family:'Atkinson Hyperlegible Next MGH';
   src:url('https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/main/fonts/webfonts/AtkinsonHyperlegibleNext%5Bwght%5D.woff2') format('woff2');
@@ -13,57 +12,14 @@
   font-weight:200 800;
   font-display:swap;
 }
-
 .hymn{font-family:'Source Sans 3 MGH',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;}
 html[data-reading-font="accessible"] .hymn{font-family:'Atkinson Hyperlegible Next MGH',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;}
-
-.reading-font-controls{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  width:min(100%,260px);
-  margin:7px auto 6px;
-  padding:0 2px;
-}
-
-.reading-font-label{
-  color:#626961;
-  font-size:12px;
-  font-weight:600;
-  line-height:1;
-}
-
-.font-size-controls .reading-font-toggle{
-  position:relative;
-  width:38px !important;
-  min-width:38px !important;
-  height:22px !important;
-  min-height:22px !important;
-  margin:0 !important;
-  padding:0 !important;
-  border:0 !important;
-  border-radius:999px !important;
-  background:#d5d9d3 !important;
-  box-shadow:inset 0 0 0 1px rgba(70,76,69,.08) !important;
-  cursor:pointer;
-  transition:background .15s ease;
-}
-
-.reading-font-switch-knob{
-  position:absolute;
-  top:2px;
-  left:2px;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  background:#fff;
-  box-shadow:0 1px 3px rgba(0,0,0,.20);
-  transition:transform .15s ease;
-}
-
+.reading-font-controls{display:grid;grid-template-columns:1fr 38px;align-items:center;column-gap:12px;width:min(100%,240px);min-height:30px;margin:2px auto;padding:0;}
+.reading-font-label{color:#626961;font-size:12px;font-weight:600;line-height:1;text-align:left;}
+.font-size-controls .reading-font-toggle{position:relative;width:38px !important;min-width:38px !important;height:22px !important;min-height:22px !important;margin:0 !important;padding:0 !important;border:0 !important;border-radius:999px !important;background:#d5d9d3 !important;box-shadow:inset 0 0 0 1px rgba(70,76,69,.08) !important;cursor:pointer;transition:background .15s ease;}
+.reading-font-switch-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.20);transition:transform .15s ease;}
 .font-size-controls .reading-font-toggle.active{background:#747d72 !important;}
 .font-size-controls .reading-font-toggle.active .reading-font-switch-knob{transform:translateX(16px);}
-
 html[data-theme="dark"] .reading-font-label{color:#b1b8ae;}
 html[data-theme="dark"] .reading-font-toggle{background:#454c46 !important;}
 html[data-theme="dark"] .reading-font-toggle.active{background:#828c80 !important;}
