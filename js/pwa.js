@@ -4,7 +4,9 @@
   const RESTORE_KEY = 'mgh-update-restore-state';
   let deferredInstallPrompt = null;
   let checking = false;
-  let hasBackgrounded = false;
+  let resumeArmed = false;
+  let bootComplete = false;
+  let lastResumeCheck = 0;
 
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -123,10 +125,6 @@
       if (!nav || !section || !input || !state.hymnNumber) return;
 
       nav.click();
-
-      // search-flow.js intentionally clears the newly selected book in a
-      // zero-delay callback after a book switch. Restore the hymn only after
-      // that normal cleanup has completed, otherwise it gets hidden again.
       setTimeout(() => {
         input.value = String(state.hymnNumber);
         input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -183,6 +181,9 @@
 
   async function checkForUpdateOnResume(registration) {
     if (checking || document.visibilityState !== 'visible' || !navigator.onLine) return;
+    const now = Date.now();
+    if (now - lastResumeCheck < 1200) return;
+    lastResumeCheck = now;
     checking = true;
     try {
       const deployed = await fetchDeployedVersion();
@@ -227,25 +228,34 @@
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' });
+      bootComplete = true;
+
+      const armResume = () => {
+        if (!bootComplete) return;
+        resumeArmed = true;
+        saveReadingStateForReload();
+        registration.update().catch(() => {});
+      };
+
+      const tryResume = () => {
+        if (!bootComplete || !resumeArmed || document.visibilityState !== 'visible') return;
+        resumeArmed = false;
+        setTimeout(() => checkForUpdateOnResume(registration), 100);
+      };
 
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') {
-          hasBackgrounded = true;
-          registration.update().catch(() => {});
-          return;
-        }
-        if (document.visibilityState === 'visible' && hasBackgrounded) {
-          hasBackgrounded = false;
-          checkForUpdateOnResume(registration);
-        }
+        if (document.visibilityState === 'hidden') armResume();
+        else tryResume();
       });
+      window.addEventListener('pagehide', armResume);
+      window.addEventListener('pageshow', event => {
+        if (event.persisted || resumeArmed) tryResume();
+      });
+      window.addEventListener('focus', tryResume);
 
       window.addEventListener('online', () => {
         showOfflineStatus();
-        if (document.visibilityState === 'visible' && hasBackgrounded) {
-          hasBackgrounded = false;
-          checkForUpdateOnResume(registration);
-        }
+        tryResume();
       });
       window.addEventListener('offline', showOfflineStatus);
 
