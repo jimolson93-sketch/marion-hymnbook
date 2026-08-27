@@ -33,8 +33,8 @@
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'reading-font-toggle';
-    button.textContent = 'Aa Clarity';
-    button.setAttribute('aria-label','Use clarity reading font');
+    button.textContent = 'Aa Low Vision';
+    button.setAttribute('aria-label','Use low vision reading font');
     button.setAttribute('aria-pressed','false');
     button.addEventListener('click', () => {
       applyMode(readMode() === 'accessible' ? 'default' : 'accessible', true);
