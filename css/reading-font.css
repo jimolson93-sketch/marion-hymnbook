@@ -23,30 +23,17 @@ html[data-reading-font="accessible"] .hymn{
 }
 
 .reading-font-controls{
+  display:flex;
+  justify-content:center;
   width:min(100%,260px);
   margin:5px auto 0;
 }
 
-.reading-font-label{
-  margin:0 0 5px;
-  text-align:center;
-  color:var(--muted);
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.02em;
-}
-
-.reading-font-options{
-  display:flex;
-  gap:6px;
-}
-
-.font-size-controls .reading-font-option{
-  flex:1 1 0;
-  min-width:0;
+.font-size-controls .reading-font-toggle{
+  min-width:92px;
   min-height:30px;
   height:30px;
-  padding:0 8px;
+  padding:0 12px;
   border:1px solid #d3d6d0;
   border-radius:7px;
   background:#fff;
@@ -58,12 +45,11 @@ html[data-reading-font="accessible"] .hymn{
   cursor:pointer;
 }
 
-.font-size-controls .reading-font-option.active{
+.font-size-controls .reading-font-toggle.active{
   border-color:#747d72;
   background:#747d72;
   color:#fff;
 }
 
-html[data-theme="dark"] .reading-font-label{color:#b1b8ae;}
-html[data-theme="dark"] .reading-font-option{border-color:#444b45 !important;background:#292e2a !important;color:#cdd2cb !important;}
-html[data-theme="dark"] .reading-font-option.active{border-color:#828c80 !important;background:#828c80 !important;color:#151815 !important;}
+html[data-theme="dark"] .reading-font-toggle{border-color:#444b45 !important;background:#292e2a !important;color:#cdd2cb !important;}
+html[data-theme="dark"] .reading-font-toggle.active{border-color:#828c80 !important;background:#828c80 !important;color:#151815 !important;}
