@@ -1,36 +1,28 @@
 (() => {
   const STORAGE_KEY = 'mgh-appearance';
-  const VALID = new Set(['light', 'auto', 'dark']);
-  const media = window.matchMedia('(prefers-color-scheme: dark)');
 
   function readMode() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return VALID.has(saved) ? saved : 'light';
+      return localStorage.getItem(STORAGE_KEY) === 'dark' ? 'dark' : 'light';
     } catch (_) {
       return 'light';
     }
   }
 
-  function resolvedTheme(mode) {
-    if (mode === 'auto') return media.matches ? 'dark' : 'light';
-    return mode;
-  }
-
   function applyMode(mode, persist = true) {
-    if (!VALID.has(mode)) mode = 'light';
-    const theme = resolvedTheme(mode);
+    mode = mode === 'dark' ? 'dark' : 'light';
     document.documentElement.dataset.appearance = mode;
-    document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.theme = mode;
 
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? '#1d211e' : '#747d72');
+    if (meta) meta.setAttribute('content', mode === 'dark' ? '#1d211e' : '#747d72');
 
-    document.querySelectorAll('.appearance-option').forEach(button => {
-      const active = button.dataset.appearance === mode;
+    const button = document.querySelector('.appearance-toggle');
+    if (button) {
+      const active = mode === 'dark';
       button.classList.toggle('active', active);
-      button.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
+      button.setAttribute('aria-checked', active ? 'true' : 'false');
+    }
 
     if (persist) {
       try { localStorage.setItem(STORAGE_KEY, mode); } catch (_) {}
@@ -44,23 +36,20 @@
     const wrap = document.createElement('div');
     wrap.className = 'appearance-controls';
 
-    const options = document.createElement('div');
-    options.className = 'appearance-options';
-    options.setAttribute('role', 'group');
-    options.setAttribute('aria-label', 'Appearance');
+    const label = document.createElement('span');
+    label.className = 'appearance-label';
+    label.textContent = 'Dark Mode';
 
-    [['light', 'Light'], ['auto', 'Auto'], ['dark', 'Dark']].forEach(([value, text]) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'appearance-option';
-      button.dataset.appearance = value;
-      button.textContent = text;
-      button.setAttribute('aria-pressed', 'false');
-      button.addEventListener('click', () => applyMode(value, true));
-      options.appendChild(button);
-    });
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'appearance-toggle';
+    button.setAttribute('role', 'switch');
+    button.setAttribute('aria-label', 'Use dark mode');
+    button.setAttribute('aria-checked', 'false');
+    button.innerHTML = '<span class="appearance-switch-knob" aria-hidden="true"></span>';
+    button.addEventListener('click', () => applyMode(readMode() === 'dark' ? 'light' : 'dark', true));
 
-    wrap.append(options);
+    wrap.append(label, button);
 
     const footer = fontControls.querySelector('.drawer-footer');
     if (footer) fontControls.insertBefore(wrap, footer);
@@ -68,13 +57,6 @@
 
     applyMode(readMode(), false);
   }
-
-  function onSystemChange() {
-    if (readMode() === 'auto') applyMode('auto', false);
-  }
-
-  if (typeof media.addEventListener === 'function') media.addEventListener('change', onSystemChange);
-  else if (typeof media.addListener === 'function') media.addListener('change', onSystemChange);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildControls, { once: true });
   else buildControls();
