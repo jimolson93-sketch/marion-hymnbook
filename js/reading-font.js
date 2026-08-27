@@ -2,11 +2,8 @@
   const STORAGE_KEY = 'mgh-reading-font';
 
   function readMode(){
-    try{
-      return localStorage.getItem(STORAGE_KEY) === 'accessible' ? 'accessible' : 'default';
-    }catch(_){
-      return 'default';
-    }
+    try{return localStorage.getItem(STORAGE_KEY) === 'accessible' ? 'accessible' : 'default';}
+    catch(_){return 'default';}
   }
 
   function applyMode(mode, persist = true){
@@ -18,9 +15,7 @@
       button.classList.toggle('active', active);
       button.setAttribute('aria-checked', active ? 'true' : 'false');
     }
-    if(persist){
-      try{ localStorage.setItem(STORAGE_KEY, mode); }catch(_){}
-    }
+    if(persist){try{localStorage.setItem(STORAGE_KEY, mode);}catch(_){}}
   }
 
   function buildControls(){
@@ -41,18 +36,14 @@
     button.setAttribute('aria-label','Use low vision reading font');
     button.setAttribute('aria-checked','false');
     button.innerHTML = '<span class="reading-font-switch-knob" aria-hidden="true"></span>';
-    button.addEventListener('click', () => {
-      applyMode(readMode() === 'accessible' ? 'default' : 'accessible', true);
-    });
+    button.addEventListener('click', () => applyMode(readMode() === 'accessible' ? 'default' : 'accessible', true));
 
     wrap.append(label, button);
-    appearance.insertBefore(wrap, appearance.firstChild);
+    appearance.parentNode.insertBefore(wrap, appearance);
     applyMode(readMode(), false);
   }
 
-  const initial = readMode();
-  document.documentElement.dataset.readingFont = initial;
-
+  document.documentElement.dataset.readingFont = readMode();
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildControls, {once:true});
   else buildControls();
 })();
