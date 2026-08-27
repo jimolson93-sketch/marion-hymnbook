@@ -1,24 +1,23 @@
 (() => {
   const STORAGE_KEY = 'mgh-reading-font';
-  const VALID = new Set(['default', 'accessible']);
 
   function readMode(){
     try{
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return VALID.has(saved) ? saved : 'default';
+      return localStorage.getItem(STORAGE_KEY) === 'accessible' ? 'accessible' : 'default';
     }catch(_){
       return 'default';
     }
   }
 
   function applyMode(mode, persist = true){
-    if(!VALID.has(mode)) mode = 'default';
+    mode = mode === 'accessible' ? 'accessible' : 'default';
     document.documentElement.dataset.readingFont = mode;
-    document.querySelectorAll('.reading-font-option').forEach(button => {
-      const active = button.dataset.readingFont === mode;
+    const button = document.querySelector('.reading-font-toggle');
+    if(button){
+      const active = mode === 'accessible';
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
+    }
     if(persist){
       try{ localStorage.setItem(STORAGE_KEY, mode); }catch(_){}
     }
@@ -31,27 +30,17 @@
     const wrap = document.createElement('div');
     wrap.className = 'reading-font-controls';
 
-    const label = document.createElement('div');
-    label.className = 'reading-font-label';
-    label.textContent = 'Reading Font';
-
-    const options = document.createElement('div');
-    options.className = 'reading-font-options';
-    options.setAttribute('role','group');
-    options.setAttribute('aria-label','Reading font');
-
-    [['default','Standard'],['accessible','Accessible']].forEach(([value,text]) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'reading-font-option';
-      button.dataset.readingFont = value;
-      button.textContent = text;
-      button.setAttribute('aria-pressed','false');
-      button.addEventListener('click', () => applyMode(value, true));
-      options.appendChild(button);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'reading-font-toggle';
+    button.textContent = 'Aa Clarity';
+    button.setAttribute('aria-label','Use clarity reading font');
+    button.setAttribute('aria-pressed','false');
+    button.addEventListener('click', () => {
+      applyMode(readMode() === 'accessible' ? 'default' : 'accessible', true);
     });
 
-    wrap.append(label, options);
+    wrap.appendChild(button);
     appearance.insertBefore(wrap, appearance.firstChild);
     applyMode(readMode(), false);
   }
