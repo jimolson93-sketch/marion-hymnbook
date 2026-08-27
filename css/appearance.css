@@ -1,6 +1,6 @@
 .font-size-label{display:none !important;}
 .font-size-controls{width:100% !important;max-width:none !important;margin:0 auto !important;}
-.settings-control-grid{display:grid;grid-template-columns:140px 140px;align-items:center;justify-content:center;column-gap:12px;width:min(100%,292px);margin:0 auto;}
+.settings-control-grid{display:grid;grid-template-columns:140px 140px;align-items:center;justify-content:space-evenly;column-gap:0;width:100%;margin:0 auto;}
 .font-size-slider-row{display:grid !important;grid-template-columns:40px 48px 40px !important;align-items:center !important;justify-content:center !important;column-gap:6px;width:140px !important;height:44px !important;margin:0 !important;}
 .font-size-controls .font-size-slider-row > button{width:40px !important;min-width:40px !important;height:44px !important;min-height:44px !important;margin:0 !important;padding:0 !important;border:0 !important;border-radius:8px !important;background:transparent !important;color:#626961 !important;font-size:20px !important;font-weight:650 !important;box-shadow:none !important;}
 #fontDecreaseBtn{grid-column:1 !important;}
