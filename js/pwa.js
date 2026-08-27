@@ -93,10 +93,12 @@
     const activeSection = document.querySelector('.section:not(.hidden)');
     const activeHymn = activeSection?.querySelector('.hymn.show');
     if (!activeSection || !activeHymn) return null;
+    const hymnNumber = activeHymn.querySelector('h3')?.textContent?.trim().split(/\s+/)[0] || '';
+    if (!hymnNumber) return null;
     return {
       sectionId: activeSection.id,
-      hymnId: activeHymn.id,
-      searchValue: document.getElementById('searchInput')?.value || '',
+      hymnNumber,
+      searchValue: document.getElementById('searchInput')?.value || hymnNumber,
       scrollY: Math.max(0, Math.round(window.scrollY || 0))
     };
   }
@@ -113,25 +115,40 @@
       const raw = sessionStorage.getItem(RESTORE_KEY);
       if (!raw) return;
       state = JSON.parse(raw);
-      sessionStorage.removeItem(RESTORE_KEY);
     } catch (_) { return; }
 
+    // Wait until all mgh:data-ready listeners have finished setting up the app,
+    // then restore through the normal book/search controls.
     setTimeout(() => {
       const nav = document.querySelector(`.nav button[data-target="${state.sectionId}"]`);
-      if (!nav) return;
-      nav.click();
-
-      const hymn = document.getElementById(state.hymnId);
+      const section = document.getElementById(state.sectionId);
       const input = document.getElementById('searchInput');
-      if (hymn && input) {
-        const number = hymn.querySelector('h3')?.textContent?.trim().split(/\s+/)[0] || state.searchValue || '';
-        input.value = number;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+      if (!nav || !section || !input || !state.hymnNumber) return;
+
+      nav.click();
+      input.value = state.hymnNumber;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+
+      // Verify the hymn is visible inside the restored book. This avoids any
+      // ambiguity from duplicate hymn DOM ids shared by different books.
+      const restored = Array.from(section.querySelectorAll('.hymn')).find(hymn => {
+        const num = hymn.querySelector('h3')?.textContent?.trim().split(/\s+/)[0];
+        return num === String(state.hymnNumber);
+      });
+      if (restored && !restored.classList.contains('show')) {
+        section.querySelectorAll('.hymn.show').forEach(hymn => hymn.classList.remove('show'));
+        restored.classList.add('show');
       }
 
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        window.scrollTo({ top: Number(state.scrollY) || 0, left: 0, behavior: 'auto' });
-      }));
+      try { sessionStorage.removeItem(RESTORE_KEY); } catch (_) {}
+
+      const restoreScroll = () => window.scrollTo({
+        top: Number(state.scrollY) || 0,
+        left: 0,
+        behavior: 'auto'
+      });
+      requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
+      setTimeout(restoreScroll, 120);
     }, 0);
   }
 
@@ -181,8 +198,6 @@
       await registration.update();
       if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
 
-      // Apply only while backgrounded. The saved hymn and scroll position are
-      // restored when the refreshed app finishes loading.
       if (document.visibilityState === 'hidden') window.location.reload();
     } catch (_) {
       // Leave the current working version untouched if the background update fails.
@@ -212,8 +227,6 @@
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' });
 
-      // Do not interrupt a fresh launch. Update checks happen only after the app
-      // moves into the background/minimized state.
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
           saveReadingState();
