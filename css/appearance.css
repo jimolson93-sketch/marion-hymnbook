@@ -39,7 +39,6 @@
 }
 
 .font-size-controls .font-size-slider-row > button:disabled{opacity:.35 !important;}
-
 #fontSizeSlider{width:100% !important;margin:0 !important;}
 
 .font-size-display{
@@ -88,15 +87,28 @@
 .font-size-controls .appearance-option:first-child{border-left:0 !important;}
 .font-size-controls .appearance-option.active{background:#747d72 !important;color:#fff !important;}
 
-.app-version{
-  margin:6px 0 0 !important;
+.drawer-footer{
+  display:grid;
+  grid-template-columns:28px 1fr 28px;
+  align-items:center;
+  width:min(100%,260px);
+  min-height:26px;
+  margin:3px auto 0;
+}
+
+.drawer-footer .app-version{
+  grid-column:2;
+  margin:0 !important;
   padding:0 !important;
   border:0 !important;
   color:rgba(91,98,89,.42) !important;
   font-size:9px !important;
+  line-height:1 !important;
+  text-align:center;
 }
 
-.settings-drawer.open{max-height:190px;overflow:visible;}
+.drawer-footer .share-row{grid-column:3;}
+.settings-drawer.open{max-height:195px;overflow:visible;}
 
 html[data-theme="dark"]{
   color-scheme:dark;
