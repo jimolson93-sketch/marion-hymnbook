@@ -2,9 +2,9 @@
   const DISMISS_KEY = 'mghInstallPromptDismissed';
   const VERSION_KEY = 'mgh-deployed-version';
   const RESTORE_KEY = 'mgh-update-restore-state';
-  const CHECK_INTERVAL = 60000;
   let deferredInstallPrompt = null;
   let checking = false;
+  let hasBackgrounded = false;
 
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -98,27 +98,24 @@
     return {
       sectionId: activeSection.id,
       hymnNumber,
-      searchValue: document.getElementById('searchInput')?.value || hymnNumber,
       scrollY: Math.max(0, Math.round(window.scrollY || 0))
     };
   }
 
-  function saveReadingState() {
+  function saveReadingStateForReload() {
     const state = captureReadingState();
     if (!state) return;
-    try { sessionStorage.setItem(RESTORE_KEY, JSON.stringify(state)); } catch (_) {}
+    try { localStorage.setItem(RESTORE_KEY, JSON.stringify(state)); } catch (_) {}
   }
 
   function restoreReadingState() {
     let state = null;
     try {
-      const raw = sessionStorage.getItem(RESTORE_KEY);
+      const raw = localStorage.getItem(RESTORE_KEY);
       if (!raw) return;
       state = JSON.parse(raw);
     } catch (_) { return; }
 
-    // Wait until all mgh:data-ready listeners have finished setting up the app,
-    // then restore through the normal book/search controls.
     setTimeout(() => {
       const nav = document.querySelector(`.nav button[data-target="${state.sectionId}"]`);
       const section = document.getElementById(state.sectionId);
@@ -126,11 +123,9 @@
       if (!nav || !section || !input || !state.hymnNumber) return;
 
       nav.click();
-      input.value = state.hymnNumber;
+      input.value = String(state.hymnNumber);
       input.dispatchEvent(new Event('input', { bubbles: true }));
 
-      // Verify the hymn is visible inside the restored book. This avoids any
-      // ambiguity from duplicate hymn DOM ids shared by different books.
       const restored = Array.from(section.querySelectorAll('.hymn')).find(hymn => {
         const num = hymn.querySelector('h3')?.textContent?.trim().split(/\s+/)[0];
         return num === String(state.hymnNumber);
@@ -140,7 +135,7 @@
         restored.classList.add('show');
       }
 
-      try { sessionStorage.removeItem(RESTORE_KEY); } catch (_) {}
+      try { localStorage.removeItem(RESTORE_KEY); } catch (_) {}
 
       const restoreScroll = () => window.scrollTo({
         top: Number(state.scrollY) || 0,
@@ -148,7 +143,7 @@
         behavior: 'auto'
       });
       requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
-      setTimeout(restoreScroll, 120);
+      setTimeout(restoreScroll, 150);
     }, 0);
   }
 
@@ -179,8 +174,8 @@
     return completed;
   }
 
-  async function checkForBackgroundUpdate(registration) {
-    if (checking || document.visibilityState !== 'hidden' || !navigator.onLine) return;
+  async function checkForUpdateOnResume(registration) {
+    if (checking || document.visibilityState !== 'visible' || !navigator.onLine) return;
     checking = true;
     try {
       const deployed = await fetchDeployedVersion();
@@ -192,15 +187,16 @@
       }
       if (known === deployed) return;
 
-      saveReadingState();
+      // Preserve the visible hymn before applying the new build. The restored
+      // version reopens the same book/hymn after its data has finished loading.
+      saveReadingStateForReload();
       await refreshVersionCache(registration, deployed);
       localStorage.setItem(VERSION_KEY, deployed);
       await registration.update();
       if (registration.waiting) registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-
-      if (document.visibilityState === 'hidden') window.location.reload();
+      window.location.reload();
     } catch (_) {
-      // Leave the current working version untouched if the background update fails.
+      // Keep the current working version if the update check or cache refresh fails.
     } finally {
       checking = false;
     }
@@ -227,20 +223,29 @@
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' });
 
+      // A fresh launch is left alone. Once the user backgrounds the app, the
+      // next return to the foreground is the reliable iOS opportunity to check
+      // and apply an update while preserving the current hymn.
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
-          saveReadingState();
-          checkForBackgroundUpdate(registration);
+          hasBackgrounded = true;
+          // Best effort only: iOS may suspend this immediately, so correctness
+          // never depends on work completing while hidden.
+          registration.update().catch(() => {});
+          return;
+        }
+        if (document.visibilityState === 'visible' && hasBackgrounded) {
+          hasBackgrounded = false;
+          checkForUpdateOnResume(registration);
         }
       });
 
-      setInterval(() => {
-        if (document.visibilityState === 'hidden') checkForBackgroundUpdate(registration);
-      }, CHECK_INTERVAL);
-
       window.addEventListener('online', () => {
         showOfflineStatus();
-        if (document.visibilityState === 'hidden') checkForBackgroundUpdate(registration);
+        if (document.visibilityState === 'visible' && hasBackgrounded) {
+          hasBackgrounded = false;
+          checkForUpdateOnResume(registration);
+        }
       });
       window.addEventListener('offline', showOfflineStatus);
 
