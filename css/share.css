@@ -1,32 +1,32 @@
-.share-row{
+.drawer-footer .share-row{
   display:flex;
-  align-items:stretch;
-  justify-content:center;
-  flex:0 0 46px;
-  width:46px;
+  align-items:center;
+  justify-content:flex-end;
+  width:28px;
+  height:26px;
   margin:0;
 }
 
-.utility-row .share-qr-trigger{
+.drawer-footer .share-qr-trigger{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:100%;
-  min-width:0 !important;
-  min-height:40px !important;
-  height:auto;
+  width:28px;
+  height:26px;
+  min-width:28px !important;
+  min-height:26px !important;
   margin:0 !important;
   padding:0 !important;
-  border:1px solid #d3d6d0 !important;
-  border-radius:7px !important;
-  background:rgba(255,255,255,.72) !important;
-  color:#747b72 !important;
+  border:0 !important;
+  border-radius:6px !important;
+  background:transparent !important;
+  color:#777e75 !important;
   box-shadow:none !important;
   cursor:pointer;
 }
 
-.share-qr-trigger svg{width:18px;height:18px;display:block;}
-.share-qr-trigger:hover,.share-qr-trigger:focus-visible{color:var(--text);background:#f2f3f0 !important;outline:none;}
+.share-qr-trigger svg{width:16px;height:16px;display:block;}
+.drawer-footer .share-qr-trigger:hover,.drawer-footer .share-qr-trigger:focus-visible{color:var(--text) !important;background:rgba(116,125,114,.08) !important;outline:none;}
 
 .share-qr-modal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:rgba(16,18,16,.50);-webkit-backdrop-filter:blur(14px) saturate(.75);backdrop-filter:blur(14px) saturate(.75);}
 .share-qr-modal[hidden]{display:none;}
@@ -38,7 +38,5 @@
 .share-qr-image{display:block;width:min(68vw,280px);height:auto;image-rendering:pixelated;}
 body.share-qr-open{overflow:hidden;}
 
-html[data-theme="dark"] .utility-row .share-qr-trigger{border-color:#444b45 !important;background:#292e2a !important;color:#cdd2cb !important;}
-html[data-theme="dark"] .utility-row .share-qr-trigger:hover{background:#303631 !important;}
-
-@media (max-width:520px){.share-row{flex-basis:42px;width:42px;}.share-qr-trigger svg{width:17px;height:17px;}}
+html[data-theme="dark"] .drawer-footer .share-qr-trigger{background:transparent !important;color:#aeb5ab !important;}
+html[data-theme="dark"] .drawer-footer .share-qr-trigger:hover{background:rgba(154,163,151,.08) !important;color:#e7e9e5 !important;}
