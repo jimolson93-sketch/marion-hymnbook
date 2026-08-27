@@ -1,7 +1,7 @@
 'use strict';
 
 const CACHE_PREFIX = 'mgh-hymnbook-';
-const CACHE_VERSION = '1.2.70';
+const CACHE_VERSION = '1.2.71';
 const FONT_ASSETS = [
   'https://raw.githubusercontent.com/adobe-fonts/source-sans/release/WOFF2/VF/SourceSans3VF-Upright.otf.woff2',
   'https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/main/fonts/webfonts/AtkinsonHyperlegibleNext%5Bwght%5D.woff2'
@@ -10,25 +10,9 @@ const APP_ASSETS = [
   './','./index.html','./manifest.webmanifest','./css/styles.css','./css/theme.css','./css/index.css','./css/favorites-recent.css','./css/reading-enhancements.css','./css/startup-guidance.css','./css/search-enhancements.css','./css/view-tools.css','./css/mobile-ui.css','./css/appearance.css','./css/reading-font.css','./css/show-all-fix.css','./css/verse-number-fix.css','./css/interaction-fix.css','./css/reading-space-fix.css','./css/share.css','./js/bootstrap.js','./js/app.js','./js/reading-enhancements.js','./js/startup-guidance.js','./js/search-enhancements.js','./js/search-flow.js','./js/view-tools.js','./js/index-format.js','./js/favorites-recent.js','./js/mobile-ui.js','./js/appearance.js','./js/reading-font.js','./js/show-all-fix.js','./js/keyboard-scroll-fix.js','./js/share.js','./js/pwa.js','./data/new-believers.html','./data/gospel.html','./data/believers.html','./version.json','./icons/app-icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./icons/share-qr.svg'
 ];
 function cacheName(version){return CACHE_PREFIX+version;}
-async function populate(version){
-  const name=cacheName(version);
-  const cache=await caches.open(name);
-  await cache.addAll(APP_ASSETS.map(url=>new Request(url,{cache:'reload'})));
-  await cache.addAll(FONT_ASSETS.map(url=>new Request(url,{mode:'cors',cache:'reload'})));
-  return name;
-}
+async function populate(version){const name=cacheName(version);const cache=await caches.open(name);await cache.addAll(APP_ASSETS.map(url=>new Request(url,{cache:'reload'})));await cache.addAll(FONT_ASSETS.map(url=>new Request(url,{mode:'cors',cache:'reload'})));return name;}
 async function removeOldCaches(keep){const names=await caches.keys();await Promise.all(names.filter(name=>name.startsWith(CACHE_PREFIX)&&name!==keep).map(name=>caches.delete(name)));}
 self.addEventListener('install',event=>{event.waitUntil(populate(CACHE_VERSION).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(removeOldCaches(cacheName(CACHE_VERSION)).then(()=>self.clients.claim()));});
 self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING'){self.skipWaiting();return;}if(!event.data||event.data.type!=='REFRESH_CACHE')return;const version=event.data.version;event.waitUntil(populate(version).then(async()=>{const keep=cacheName(version);await removeOldCaches(keep);if(event.ports[0])event.ports[0].postMessage({ok:true});}).catch(()=>{if(event.ports[0])event.ports[0].postMessage({ok:false});}));});
-self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET')return;
-  const url=new URL(event.request.url);
-  if(FONT_ASSETS.includes(url.href)){
-    event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));
-    return;
-  }
-  if(url.origin!==self.location.origin)return;
-  if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(cacheName(CACHE_VERSION)).then(cache=>cache.put('./index.html',copy));return response;}).catch(()=>caches.match('./index.html').then(response=>response||caches.match('./'))));return;}
-  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));
-});
+self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const url=new URL(event.request.url);if(FONT_ASSETS.includes(url.href)){event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));return;}if(url.origin!==self.location.origin)return;if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(cacheName(CACHE_VERSION)).then(cache=>cache.put('./index.html',copy));return response;}).catch(()=>caches.match('./index.html').then(response=>response||caches.match('./'))));return;}event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));});
