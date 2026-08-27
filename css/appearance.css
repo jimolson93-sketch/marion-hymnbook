@@ -1,13 +1,57 @@
 .appearance-controls{
+  display:block;
   width:100%;
-  margin-top:4px;
-  padding-top:2px;
-  padding-bottom:3px;
-  border-top:0;
+  margin-top:0;
+  padding:0;
 }
 
-.font-size-label{
-  display:none !important;
+.font-size-label{display:none !important;}
+
+/* Compact the entire Aa drawer into reading-size, accessibility and appearance rows. */
+.font-size-controls{
+  width:100% !important;
+  max-width:560px !important;
+}
+
+.font-size-slider-row{
+  display:grid !important;
+  grid-template-columns:34px minmax(0,1fr) 34px 42px !important;
+  align-items:center !important;
+  gap:8px !important;
+  width:min(100%,360px) !important;
+  margin:2px auto 0 !important;
+}
+
+.font-size-controls .font-size-slider-row > button{
+  width:34px !important;
+  min-width:34px !important;
+  height:30px !important;
+  min-height:30px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:6px !important;
+  background:transparent !important;
+  color:#626961 !important;
+  font-size:14px !important;
+  font-weight:650 !important;
+  box-shadow:none !important;
+}
+
+.font-size-controls .font-size-slider-row > button:disabled{opacity:.35 !important;}
+
+#fontSizeSlider{width:100% !important;margin:0 !important;}
+
+.font-size-display{
+  grid-column:4 !important;
+  grid-row:1 !important;
+  width:auto !important;
+  margin:0 !important;
+  color:#777e75 !important;
+  font-size:11px !important;
+  font-weight:500 !important;
+  line-height:1 !important;
+  text-align:right !important;
 }
 
 .appearance-options{
@@ -15,45 +59,44 @@
   justify-content:center;
   width:min(100%,260px);
   margin:0 auto;
-  gap:6px;
+  gap:0;
+  overflow:hidden;
+  border:1px solid #d3d6d0;
+  border-radius:7px;
+  background:#fff;
 }
 
 .font-size-controls .appearance-option{
   flex:1 1 0;
-  min-width:0;
-  min-height:30px;
-  height:30px;
-  padding:0 8px;
-  border:1px solid #d3d6d0;
-  border-radius:7px;
-  background:#fff;
-  color:#5c625a;
+  min-width:0 !important;
+  min-height:28px !important;
+  height:28px !important;
+  margin:0 !important;
+  padding:0 7px !important;
+  border:0 !important;
+  border-left:1px solid #d3d6d0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  color:#626961 !important;
   font:inherit;
-  font-size:12px;
-  font-weight:600;
-  line-height:1;
+  font-size:11px !important;
+  font-weight:600 !important;
+  line-height:1 !important;
   cursor:pointer;
 }
 
-.font-size-controls .appearance-option.active{
-  border-color:#747d72;
-  background:#747d72;
-  color:#fff;
-}
+.font-size-controls .appearance-option:first-child{border-left:0 !important;}
+.font-size-controls .appearance-option.active{background:#747d72 !important;color:#fff !important;}
 
 .app-version{
-  margin-top:5px !important;
-  margin-bottom:5px !important;
-  padding-top:5px !important;
-  padding-bottom:0 !important;
-  border-top:0 !important;
-  color:rgba(91,98,89,.64) !important;
+  margin:6px 0 0 !important;
+  padding:0 !important;
+  border:0 !important;
+  color:rgba(91,98,89,.42) !important;
+  font-size:9px !important;
 }
 
-.settings-drawer.open{
-  max-height:300px;
-  overflow:visible;
-}
+.settings-drawer.open{max-height:190px;overflow:visible;}
 
 html[data-theme="dark"]{
   color-scheme:dark;
@@ -74,13 +117,17 @@ html[data-theme="dark"] .search-row input[type=text]{border-color:#454c46 !impor
 html[data-theme="dark"] .search-row input[type=text]::placeholder{color:#8f978d !important;}
 html[data-theme="dark"] .search-row input[type=text]:focus{border-color:#727c70 !important;box-shadow:0 0 0 3px rgba(154,163,151,.10) !important;}
 html[data-theme="dark"] .search-mode-btn{border-color:#788177;background:#727c70;color:#fff;}
-html[data-theme="dark"] .utility-row > button,html[data-theme="dark"] .nav button,html[data-theme="dark"] .appearance-option{border-color:#444b45 !important;background:#292e2a !important;color:#cdd2cb !important;}
-html[data-theme="dark"] .utility-row > button:hover,html[data-theme="dark"] .nav button:hover,html[data-theme="dark"] .appearance-option:hover{background:#303631 !important;}
-html[data-theme="dark"] #indexBtn.active,html[data-theme="dark"] #showAllBtn.active,html[data-theme="dark"] .nav button.active,html[data-theme="dark"] .appearance-option.active{border-color:#828c80 !important;background:#828c80 !important;color:#151815 !important;}
+html[data-theme="dark"] .utility-row > button,html[data-theme="dark"] .nav button{border-color:#444b45 !important;background:#292e2a !important;color:#cdd2cb !important;}
+html[data-theme="dark"] .utility-row > button:hover,html[data-theme="dark"] .nav button:hover{background:#303631 !important;}
+html[data-theme="dark"] #indexBtn.active,html[data-theme="dark"] #showAllBtn.active,html[data-theme="dark"] .nav button.active{border-color:#828c80 !important;background:#828c80 !important;color:#151815 !important;}
 html[data-theme="dark"] #settingsBtn.active{border-color:#596159 !important;background:#333934 !important;color:#d9ddd7 !important;}
 html[data-theme="dark"] .settings-drawer,html[data-theme="dark"] .settings-inner,html[data-theme="dark"] .font-size-controls{color:#dfe3dc !important;}
-html[data-theme="dark"] .font-size-display{color:#b1b8ae !important;}
-html[data-theme="dark"] .app-version{color:rgba(196,203,193,.58) !important;border-color:rgba(190,198,187,.16) !important;}
+html[data-theme="dark"] .font-size-slider-row > button{color:#b1b8ae !important;}
+html[data-theme="dark"] .font-size-display{color:#aeb5ab !important;}
+html[data-theme="dark"] .appearance-options{border-color:#444b45;background:#292e2a;}
+html[data-theme="dark"] .appearance-option{border-left-color:#444b45 !important;color:#cdd2cb !important;}
+html[data-theme="dark"] .appearance-option.active{background:#828c80 !important;color:#151815 !important;}
+html[data-theme="dark"] .app-version{color:rgba(196,203,193,.42) !important;}
 html[data-theme="dark"] .index a{border-bottom-color:#3d433e !important;color:#c4cbc1 !important;}
 html[data-theme="dark"] .index a.index-expanded{background:#2c312d !important;color:#e2e6df !important;}
 html[data-theme="dark"] .index-number{color:#e0e4dd !important;}
