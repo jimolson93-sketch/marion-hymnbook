@@ -123,27 +123,34 @@
       if (!nav || !section || !input || !state.hymnNumber) return;
 
       nav.click();
-      input.value = String(state.hymnNumber);
-      input.dispatchEvent(new Event('input', { bubbles: true }));
 
-      const restored = Array.from(section.querySelectorAll('.hymn')).find(hymn => {
-        const num = hymn.querySelector('h3')?.textContent?.trim().split(/\s+/)[0];
-        return num === String(state.hymnNumber);
-      });
-      if (restored && !restored.classList.contains('show')) {
-        section.querySelectorAll('.hymn.show').forEach(hymn => hymn.classList.remove('show'));
-        restored.classList.add('show');
-      }
+      // search-flow.js intentionally clears the newly selected book in a
+      // zero-delay callback after a book switch. Restore the hymn only after
+      // that normal cleanup has completed, otherwise it gets hidden again.
+      setTimeout(() => {
+        input.value = String(state.hymnNumber);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
 
-      try { localStorage.removeItem(RESTORE_KEY); } catch (_) {}
+        const restored = Array.from(section.querySelectorAll('.hymn')).find(hymn => {
+          const num = hymn.querySelector('h3')?.textContent?.trim().split(/\s+/)[0];
+          return num === String(state.hymnNumber);
+        });
+        if (restored && !restored.classList.contains('show')) {
+          section.querySelectorAll('.hymn.show').forEach(hymn => hymn.classList.remove('show'));
+          restored.classList.add('show');
+        }
 
-      const restoreScroll = () => window.scrollTo({
-        top: Number(state.scrollY) || 0,
-        left: 0,
-        behavior: 'auto'
-      });
-      requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
-      setTimeout(restoreScroll, 150);
+        if (!restored) return;
+        try { localStorage.removeItem(RESTORE_KEY); } catch (_) {}
+
+        const restoreScroll = () => window.scrollTo({
+          top: Number(state.scrollY) || 0,
+          left: 0,
+          behavior: 'auto'
+        });
+        requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
+        setTimeout(restoreScroll, 150);
+      }, 0);
     }, 0);
   }
 
@@ -187,8 +194,6 @@
       }
       if (known === deployed) return;
 
-      // Preserve the visible hymn before applying the new build. The restored
-      // version reopens the same book/hymn after its data has finished loading.
       saveReadingStateForReload();
       await refreshVersionCache(registration, deployed);
       localStorage.setItem(VERSION_KEY, deployed);
@@ -223,14 +228,9 @@
     try {
       const registration = await navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' });
 
-      // A fresh launch is left alone. Once the user backgrounds the app, the
-      // next return to the foreground is the reliable iOS opportunity to check
-      // and apply an update while preserving the current hymn.
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') {
           hasBackgrounded = true;
-          // Best effort only: iOS may suspend this immediately, so correctness
-          // never depends on work completing while hidden.
           registration.update().catch(() => {});
           return;
         }
