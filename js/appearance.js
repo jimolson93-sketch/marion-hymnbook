@@ -62,8 +62,8 @@
 
     wrap.append(options);
 
-    const version = fontControls.querySelector('.app-version');
-    if (version) fontControls.insertBefore(wrap, version);
+    const footer = fontControls.querySelector('.drawer-footer');
+    if (footer) fontControls.insertBefore(wrap, footer);
     else fontControls.appendChild(wrap);
 
     applyMode(readMode(), false);
@@ -74,7 +74,7 @@
   }
 
   if (typeof media.addEventListener === 'function') media.addEventListener('change', onSystemChange);
-  else if (typeof media.addListener === 'function') media.addListener(onSystemChange);
+  else if (typeof media.addListener === 'function') media.addListener('change', onSystemChange);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildControls, { once: true });
   else buildControls();
