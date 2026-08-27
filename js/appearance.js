@@ -74,7 +74,7 @@
   }
 
   if (typeof media.addEventListener === 'function') media.addEventListener('change', onSystemChange);
-  else if (typeof media.addListener === 'function') media.addListener('change', onSystemChange);
+  else if (typeof media.addListener === 'function') media.addListener(onSystemChange);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildControls, { once: true });
   else buildControls();
