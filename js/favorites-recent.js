@@ -1,10 +1,11 @@
 (() => {
   const FAVORITES_KEY = 'mghFavoritesV1';
-  const RECENT_KEY = 'mghRecentV1';
-  const RECENT_LIMIT = 10;
+  const HISTORY_KEY = 'mghHistoryV1';
+  const HISTORY_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+  const HISTORY_DWELL_MS = 2 * 60 * 1000;
+  const EVENING_START_HOUR = 15;
   const HOLD_MS = 650;
   const MOVE_CANCEL_PX = 12;
-  const SEARCH_RECENT_DELAY_MS = 450;
 
   const BOOKS = {
     section1: { name: 'New Believers Hymns', short: 'New Believers' },
@@ -13,15 +14,14 @@
   };
 
   let favorites = readList(FAVORITES_KEY);
-  let recent = readList(RECENT_KEY);
+  let history = pruneHistory(readList(HISTORY_KEY));
   let holdTimer = null;
   let holdTarget = null;
   let holdRecord = null;
   let holdTriggered = false;
   let holdStartX = 0;
   let holdStartY = 0;
-  let recentTimer = null;
-  let searchRecentTimer = null;
+  let candidate = null;
   let initialized = false;
 
   function readList(key) {
@@ -35,6 +35,13 @@
 
   function writeList(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
+  }
+
+  function pruneHistory(items) {
+    const cutoff = Date.now() - HISTORY_RETENTION_MS;
+    const valid = items.filter(item => item && Number.isFinite(Number(item.timestamp)) && Number(item.timestamp) >= cutoff);
+    if (valid.length !== items.length) writeList(HISTORY_KEY, valid);
+    return valid;
   }
 
   function hymnInfo(hymn) {
@@ -85,14 +92,84 @@
     refreshSavedIndexIfVisible(true);
   }
 
-  function recordRecent(hymn, refresh = true) {
+  function periodForTimestamp(timestamp) {
+    return new Date(timestamp).getHours() < EVENING_START_HOUR ? 'Morning' : 'Evening';
+  }
+
+  function dayKey(timestamp) {
+    const date = new Date(timestamp);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function recordHistory(hymn, startedAt) {
     const info = hymnInfo(hymn);
     if (!info) return;
-    recent = recent.filter(item => item.key !== info.key);
-    recent.unshift(info);
-    recent = recent.slice(0, RECENT_LIMIT);
-    writeList(RECENT_KEY, recent);
-    if (refresh) refreshSavedIndexIfVisible();
+    const timestamp = Number(startedAt) || Date.now();
+    const day = dayKey(timestamp);
+    const period = periodForTimestamp(timestamp);
+    history = pruneHistory(history).filter(item => !(item.key === info.key && dayKey(item.timestamp) === day && periodForTimestamp(item.timestamp) === period));
+    history.push({ ...info, timestamp });
+    history.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+    writeList(HISTORY_KEY, history);
+    refreshSavedIndexIfVisible();
+  }
+
+  function clearCandidateTimer() {
+    if (candidate?.timer) clearTimeout(candidate.timer);
+    if (candidate) candidate.timer = null;
+  }
+
+  function pauseCandidate() {
+    if (!candidate || candidate.paused) return;
+    clearCandidateTimer();
+    candidate.elapsed += Math.max(0, Date.now() - candidate.segmentStartedAt);
+    candidate.paused = true;
+  }
+
+  function armCandidate() {
+    if (!candidate || candidate.recorded || document.hidden) return;
+    const remaining = HISTORY_DWELL_MS - candidate.elapsed;
+    if (remaining <= 0) {
+      candidate.recorded = true;
+      recordHistory(candidate.hymn, candidate.startedAt);
+      return;
+    }
+    candidate.paused = false;
+    candidate.segmentStartedAt = Date.now();
+    clearCandidateTimer();
+    candidate.timer = setTimeout(() => {
+      if (!candidate || candidate.recorded) return;
+      candidate.elapsed += Math.max(0, Date.now() - candidate.segmentStartedAt);
+      candidate.recorded = true;
+      clearCandidateTimer();
+      recordHistory(candidate.hymn, candidate.startedAt);
+    }, remaining);
+  }
+
+  function cancelCandidate(sourceLink = null) {
+    if (!candidate) return;
+    if (sourceLink && candidate.sourceLink !== sourceLink) return;
+    clearCandidateTimer();
+    candidate = null;
+  }
+
+  function startCandidate(hymn, sourceLink = null) {
+    const info = hymnInfo(hymn);
+    if (!info) { cancelCandidate(); return; }
+    if (candidate?.info?.key === info.key && candidate.sourceLink === sourceLink) return;
+    cancelCandidate();
+    candidate = {
+      hymn,
+      info,
+      sourceLink,
+      startedAt: Date.now(),
+      elapsed: 0,
+      segmentStartedAt: Date.now(),
+      paused: document.hidden,
+      recorded: false,
+      timer: null
+    };
+    armCandidate();
   }
 
   function clearHold() {
@@ -139,27 +216,10 @@
     return visible.length === 1 ? visible[0] : null;
   }
 
-  function recordVisibleRecent() { const hymn = visibleSingleHymn(); if (hymn) recordRecent(hymn); }
-
-  function recordVisibleRecentForSearch() {
-    const search = document.getElementById('searchInput');
+  function syncMainHistoryCandidate() {
     const hymn = visibleSingleHymn();
-    if (!search || !hymn) return;
-    const query = search.value.trim();
-    if (!/^\d+$/.test(query)) return;
-    const info = hymnInfo(hymn);
-    if (info?.number === query) recordRecent(hymn);
-  }
-
-  function scheduleSearchRecent() { clearTimeout(searchRecentTimer); searchRecentTimer = setTimeout(recordVisibleRecentForSearch, SEARCH_RECENT_DELAY_MS); }
-
-  function scheduleVisibleRecent() {
-    clearTimeout(recentTimer);
-    recentTimer = setTimeout(() => {
-      const search = document.getElementById('searchInput');
-      if (search && document.activeElement === search) return;
-      recordVisibleRecent();
-    }, 60);
+    if (hymn) startCandidate(hymn, null);
+    else if (!candidate?.sourceLink) cancelCandidate();
   }
 
   function buildDrawer(target) {
@@ -177,6 +237,7 @@
     index.querySelectorAll('.index-hymn-drawer').forEach(drawer => drawer.remove());
     index.querySelectorAll('a.index-expanded').forEach(link => {
       if (link !== exceptLink) {
+        cancelCandidate(link);
         link.classList.remove('index-expanded');
         link.setAttribute('aria-expanded', 'false');
       }
@@ -193,6 +254,7 @@
     const existing = link.nextElementSibling?.classList.contains('index-hymn-drawer') ? link.nextElementSibling : null;
     if (existing) {
       existing.remove();
+      cancelCandidate(link);
       link.classList.remove('index-expanded');
       link.setAttribute('aria-expanded', 'false');
       return;
@@ -202,7 +264,7 @@
     link.insertAdjacentElement('afterend', drawer);
     link.classList.add('index-expanded');
     link.setAttribute('aria-expanded', 'true');
-    recordRecent(target, false);
+    if (index.dataset.indexMode !== 'history') startCandidate(target, link);
   }
 
   function makeEntry(record, includeBook, extraClass = 'saved-index-entry') {
@@ -239,7 +301,7 @@
     tabs.setAttribute('role', 'tablist');
     tabs.setAttribute('aria-label', 'Index view');
 
-    [['all', 'All Hymns'], ['favorites', 'Favorites'], ['recent', 'Recent']].forEach(([mode, label]) => {
+    [['all', 'All Hymns'], ['favorites', 'Favorites'], ['history', 'History']].forEach(([mode, label]) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.indexMode = mode;
@@ -313,19 +375,50 @@
     content.replaceChildren(fragment);
   }
 
-  function renderRecent(index) {
+  function formatHistoryDate(timestamp) {
+    return new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(timestamp));
+  }
+
+  function renderHistory(index) {
     const content = index.querySelector('.index-view-content');
     if (!content) return;
-    const valid = recent.filter(item => hymnFromRecord(item)).slice(0, RECENT_LIMIT);
+    history = pruneHistory(history).filter(item => hymnFromRecord(item));
+    writeList(HISTORY_KEY, history);
     const fragment = document.createDocumentFragment();
-    if (!valid.length) {
+
+    if (!history.length) {
       const empty = document.createElement('div');
       empty.className = 'saved-index-empty';
-      empty.innerHTML = '<strong>No recent hymns yet.</strong><span>Hymns you open will appear here.</span>';
+      empty.innerHTML = '<strong>No history yet.</strong><span>Hymns kept open for about two minutes will appear here.</span>';
       fragment.appendChild(empty);
-    } else {
-      valid.forEach(item => fragment.appendChild(makeEntry(item, true)));
+      content.replaceChildren(fragment);
+      return;
     }
+
+    const days = new Map();
+    history.slice().sort((a, b) => Number(b.timestamp) - Number(a.timestamp)).forEach(item => {
+      const key = dayKey(item.timestamp);
+      if (!days.has(key)) days.set(key, { timestamp: item.timestamp, Morning: [], Evening: [] });
+      days.get(key)[periodForTimestamp(item.timestamp)].push(item);
+    });
+
+    days.forEach(day => {
+      const dateHeading = document.createElement('div');
+      dateHeading.className = 'history-date-heading';
+      dateHeading.textContent = formatHistoryDate(day.timestamp);
+      fragment.appendChild(dateHeading);
+
+      ['Morning', 'Evening'].forEach(period => {
+        const items = day[period].sort((a, b) => Number(a.timestamp) - Number(b.timestamp));
+        if (!items.length) return;
+        const periodHeading = document.createElement('div');
+        periodHeading.className = 'history-period-heading';
+        periodHeading.textContent = period;
+        fragment.appendChild(periodHeading);
+        items.forEach(item => fragment.appendChild(makeEntry(item, true)));
+      });
+    });
+
     content.replaceChildren(fragment);
   }
 
@@ -334,7 +427,7 @@
     closeDrawers(index);
     setTabState(index, mode);
     if (mode === 'favorites') renderFavorites(index);
-    else if (mode === 'recent') renderRecent(index);
+    else if (mode === 'history') renderHistory(index);
     else renderAll(index);
   }
 
@@ -349,7 +442,7 @@
     const index = activeSection()?.querySelector('.index.show');
     if (!index || index.dataset.savedViewsReady !== 'true') return;
     const mode = index.dataset.indexMode || 'all';
-    if (mode === 'favorites' || mode === 'recent' || (includeAll && mode === 'all')) renderMode(index, mode);
+    if (mode === 'favorites' || mode === 'history' || (includeAll && mode === 'all')) renderMode(index, mode);
   }
 
   function initialize() {
@@ -357,6 +450,7 @@
     if (!document.querySelector('.section .hymn')) return;
     initialized = true;
     applyAllFavoriteStates();
+    writeList(HISTORY_KEY, history);
 
     document.addEventListener('pointerdown', beginHold, true);
     document.addEventListener('pointermove', moveHold, { capture: true, passive: true });
@@ -368,32 +462,24 @@
     });
 
     const observer = new MutationObserver(mutations => {
-      if (mutations.some(m => m.type === 'attributes' && m.attributeName === 'class' && m.target.classList?.contains('hymn'))) scheduleVisibleRecent();
+      if (mutations.some(m => m.type === 'attributes' && m.attributeName === 'class' && (m.target.classList?.contains('hymn') || m.target.classList?.contains('section')))) {
+        setTimeout(syncMainHistoryCandidate, 80);
+      }
     });
     document.querySelectorAll('.section').forEach(section => observer.observe(section, { subtree: true, attributes: true, attributeFilter: ['class'] }));
 
-    const search = document.getElementById('searchInput');
-    if (search) {
-      search.addEventListener('input', () => {
-        if (/^\d+$/.test(search.value.trim())) scheduleSearchRecent();
-        else clearTimeout(searchRecentTimer);
-      }, true);
-      search.addEventListener('blur', () => {
-        clearTimeout(searchRecentTimer);
-        setTimeout(recordVisibleRecentForSearch, 80);
-      });
-      search.addEventListener('keydown', event => {
-        if (event.key === 'Enter') {
-          clearTimeout(searchRecentTimer);
-          setTimeout(recordVisibleRecentForSearch, 100);
-        }
-      }, true);
-    }
+    document.addEventListener('visibilitychange', () => {
+      if (!candidate) return;
+      if (document.hidden) pauseCandidate();
+      else armCandidate();
+    });
 
     document.addEventListener('click', event => {
       const target = event.target instanceof Element ? event.target : null;
       if (target?.closest('#indexBtn')) setTimeout(setupVisibleIndex, 30);
     });
+
+    setTimeout(syncMainHistoryCandidate, 120);
   }
 
   document.addEventListener('mgh:data-ready', initialize, { once: true });
