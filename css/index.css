@@ -1,8 +1,16 @@
+.index{
+  --index-row-font-size:16px;
+  --index-row-line-height:1.2;
+}
+
 .index a.index-entry{
   display:grid;
   grid-template-columns:3ch minmax(0,1fr);
   column-gap:14px;
   align-items:baseline;
+  font-size:var(--index-row-font-size);
+  line-height:var(--index-row-line-height);
+  font-weight:400;
 }
 
 .index-number{
@@ -14,6 +22,9 @@
 
 .index-title{
   min-width:0;
+  font-size:inherit;
+  line-height:inherit;
+  font-weight:inherit;
 }
 
 @media (max-width:600px){
