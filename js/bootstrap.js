@@ -13,6 +13,45 @@
     loading.classList.add('data-load-error');
   }
 
+  function normalizeGospel136Chorus(section) {
+    const hymn = section.querySelector('article.hymn[id="136"], article.hymn[id="hymn-136"]');
+    if (!hymn) return;
+
+    const verseStarts = Array.from(hymn.querySelectorAll('p.verse.main'));
+    if (verseStarts.length < 2) return;
+
+    const chorus = [];
+    let node = verseStarts[0].nextElementSibling;
+    while (node && node !== verseStarts[1]) {
+      if (node.matches('p.verse.indent-2')) chorus.push(node);
+      node = node.nextElementSibling;
+    }
+    if (!chorus.length) return;
+
+    // Gospel 136 currently stores the chorus only after verse 1. Repeat it
+    // after later verses, but remain a no-op if the source data is corrected.
+    for (let i = 1; i < verseStarts.length; i += 1) {
+      const nextStart = verseStarts[i + 1] || null;
+      let cursor = verseStarts[i].nextElementSibling;
+      let last = verseStarts[i];
+      let hasChorus = false;
+
+      while (cursor && cursor !== nextStart) {
+        if (cursor.matches('p.verse.indent-2')) hasChorus = true;
+        last = cursor;
+        cursor = cursor.nextElementSibling;
+      }
+
+      if (hasChorus) continue;
+
+      chorus.forEach((line) => {
+        const clone = line.cloneNode(true);
+        last.insertAdjacentElement('afterend', clone);
+        last = clone;
+      });
+    }
+  }
+
   async function loadBook(book) {
     const section = document.getElementById(book.id);
     if (!section) {
@@ -33,6 +72,7 @@
       }
 
       section.innerHTML = fragment;
+      if (book.id === 'section2') normalizeGospel136Chorus(section);
     } catch (error) {
       showBookLoadError(section, error);
     }
